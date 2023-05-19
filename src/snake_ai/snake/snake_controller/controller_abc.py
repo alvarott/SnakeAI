@@ -10,8 +10,6 @@ from abc import abstractmethod, ABC
 
 
 class GameController(ABC):
-    def __init__(self):
-        pass
 
     @abstractmethod
     def action(self, *args) -> GameDirection:
