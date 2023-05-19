@@ -4,8 +4,8 @@
 # Date: 17/05/2023
 # Version: 0.0.1
 
-from src.snake_ai import FactoryABS
-import src.snake_ai.snake.snake_core.snake_gui_core as gui_core
+from snake_ai import FactoryABS
+import snake_ai.snake.snake_core.snake_gui_core as gui_core
 
 
 class SnakeGUIFactory(FactoryABS):
