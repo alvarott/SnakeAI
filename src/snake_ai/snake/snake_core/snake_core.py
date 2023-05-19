@@ -40,7 +40,7 @@ class SnakeCore:
             self._auto = True
         else:
             self._auto = False
-        self._vision: list[float]
+        self._vision: list[float] = []
         self._dist = GridOps(dist_calculator)
         self._rows = size[0]
         self._cols = size[1]
