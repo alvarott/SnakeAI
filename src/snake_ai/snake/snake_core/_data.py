@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from snake_ai.snake.enums import GameDirection
 
 
-class _Node:
+class Node:
     """
     This class represent the minimal unit(block) that forms the Snake
     """
@@ -28,7 +28,7 @@ class _Node:
         self.next = next
 
     def __eq__(self, other) -> bool:
-        if isinstance(other, _Node):
+        if isinstance(other, Node):
             return self.row == other.row and self.col == other.col and self.dir == other.dir
         else:
             raise ValueError(f'{type(self)} and {type(other)} are not comparable')
@@ -57,8 +57,8 @@ class BlockLinkedList:
     This class represents and holds the entire snake body information within the grid matrix
     """
     def __init__(self):
-        self.head: _Node | None = None
-        self.tail: _Node | None = None
+        self.head: Node | None = None
+        self.tail: Node | None = None
         self.body_map: list[tuple[int, int]] = []
         self.length: int = 0
 
@@ -83,7 +83,7 @@ class BlockLinkedList:
         :param direction: direction in which the block is moving
         :return:
         """
-        new_head = _Node(row=position[0], column=position[1], direction=direction)
+        new_head = Node(row=position[0], column=position[1], direction=direction)
         if self.length == 0:
             self.tail = new_head
             self.head = new_head
