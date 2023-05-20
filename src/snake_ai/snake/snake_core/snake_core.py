@@ -6,7 +6,7 @@
 
 
 from snake_ai.snake.enums import GameDirection, GridDict, Step, NNDirection
-from snake_ai.snake.snake_core._data import BlockLinkedList, StatsStruct
+from snake_ai.snake.snake_core._data import BlockLinkedList, Node, StatsStruct
 from snake_ai.snake.vision import GridOps
 from collections import namedtuple
 import numpy as np
@@ -15,7 +15,7 @@ import random
 Cell = namedtuple('Cell', 'row, col')
 
 
-class SnakeCore:
+class SnakeCore():
     """
     Contains the base functionality for the snake
     """
@@ -40,7 +40,7 @@ class SnakeCore:
             self._auto = True
         else:
             self._auto = False
-        self._vision: list[float] = []
+        self._vision: np.ndarray = np.empty(0)
         self._dist = GridOps(dist_calculator)
         self._rows = size[0]
         self._cols = size[1]
@@ -58,31 +58,31 @@ class SnakeCore:
             self._set_vision()
 
     @property
-    def vision(self):
+    def vision(self) -> np.ndarray:
         return self._vision
 
     @property
-    def stats(self):
+    def stats(self) -> dict:
         return self._stats_data.get_stats()
 
     @property
-    def alive(self):
+    def alive(self) -> bool:
         return self._running and not self._completed
 
     @property
-    def direction(self):
+    def direction(self) -> GameDirection:
         return self._snake.head.dir[0]
 
     @property
-    def head(self):
+    def head(self) -> Node:
         return self._snake.head
 
     @property
-    def tail(self):
+    def tail(self) -> Node:
         return self._snake.tail
 
     @property
-    def grid(self):
+    def grid(self) -> np.ndarray:
         return self._grid
 
     @grid.setter
