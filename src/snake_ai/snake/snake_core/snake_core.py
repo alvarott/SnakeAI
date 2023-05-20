@@ -51,11 +51,13 @@ class SnakeCore():
         self._completed = False
         self._spawn = False
         self._stats_data = StatsStruct(rows=self._rows, cols=self._cols)
+        self._moves_limit = 0
         self._place_snake()
         self._spawn_apple()
         self._set_cmp()
         if self._auto:
             self._set_vision()
+            self._moves_limit = (self._rows + self._cols) * 4
 
     @property
     def vision(self) -> np.ndarray:
@@ -195,6 +197,10 @@ class SnakeCore():
             self.grid = (self.head.prev.row, self.head.prev.col, GridDict.BODY.value)
             if self._auto:
                 self._set_vision()
+        # Kill process if to many are being taken
+        if self._auto and self._stats_data.moves == self._moves_limit + self._stats_data.score:
+            self._running = False
+
 
     def _set_vision(self) -> None:
         """
