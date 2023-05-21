@@ -15,7 +15,9 @@ class SnakeProcess(ABC):
     def __init__(self, size: tuple[int, int], core: SnakeCore | SnakeGUI, controller: GameController):
         """
         Constructor
-        :param size: game board dimensions
+        :param size: game grid size
+        :param core: object instance of a SnakeCore like implementation
+        :param controller: object instance of a GameController like implementation
         """
         self._core = core
         self._controller = controller
@@ -24,10 +26,18 @@ class SnakeProcess(ABC):
 
     @property
     def running(self) -> bool:
+        """
+        Flag to check if the game should continue running
+        :return:
+        """
         return self._core.alive
 
     @property
     def core(self) -> SnakeCore:
+        """
+        Hold the core object instance
+        :return:
+        """
         return self._core
 
     @property
