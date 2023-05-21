@@ -12,7 +12,7 @@ from abc import abstractmethod, ABC
 class GameController(ABC):
 
     @abstractmethod
-    def action(self, *args) -> GameDirection:
+    def action(self, *args, **kwargs) -> GameDirection:
         """
         This method must return the next direction that it follows the snake
         :return GameDirection:
