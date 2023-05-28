@@ -6,12 +6,14 @@
 
 from importlib import resources as rc
 from snake_ai.snake import resources as rsc
-from snake_ai.snake.snake_core import SnakeCore
+from snake_ai.snake.snake_core.snake_core import SnakeCore
 from snake_ai.snake.enums import GameDirection
 from abc import abstractmethod, ABC
-from pygame.surface import Surface
-from pygame.font import Font
-import pygame
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
+    from pygame.surface import Surface
+    from pygame.font import Font
 import os
 
 
