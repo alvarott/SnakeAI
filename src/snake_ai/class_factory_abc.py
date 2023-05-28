@@ -12,7 +12,7 @@ import types
 class FactoryABS(ABC):
 
     """
-    This class is meant to be a factory for Snake core implementations objects
+    This class is meant to be a factory for classes implementations of the same family
     """
     def __init__(self, module: types.ModuleType):
         """

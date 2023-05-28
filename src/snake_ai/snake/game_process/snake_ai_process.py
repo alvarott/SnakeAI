@@ -5,7 +5,7 @@
 # Date: 21/05/2023
 # Version: 0.0.1
 
-from snake_ai.snake.snake_core import SnakeCore
+from snake_ai.snake.snake_core.snake_core import SnakeCore
 from snake_ai.snake.snake_controller import AIController
 from snake_ai.snake.game_process.snake_abc_process import SnakeProcess
 
@@ -50,3 +50,5 @@ class SnakeAINOGUI(SnakeProcess):
         """
         while self.running:
             self.step()
+        print(self.stats)
+        return self
