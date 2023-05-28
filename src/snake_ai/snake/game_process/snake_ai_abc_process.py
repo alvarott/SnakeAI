@@ -8,6 +8,7 @@ from abc import ABC
 from snake_ai.snake.snake_controller.auto_controller import AIController
 import numpy as np
 
+
 class SnakeAIABC(ABC):
     """
     This class holds the common methods for all Snake AI Controlled processes
