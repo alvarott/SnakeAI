@@ -27,6 +27,15 @@ class AIController(GameController):
         """
         return self._nn.encode()
 
+    @nn_code.setter
+    def nn_code(self, code: np.ndarray) -> None:
+        """
+        Sets new values for the NN passed as a coding array
+        :param code: NN codification as an array
+        :return:
+        """
+        self._nn.decode(code)
+
     @property
     def nn_activation(self) -> dict[int, list[float]]:
         """
