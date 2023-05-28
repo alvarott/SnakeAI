@@ -1,10 +1,16 @@
+# This module contains the base class for creating functions factories, by creating those inside a class
+
+# Author: Álvaro Torralba
+# Date: 28/05/2023
+# Version: 0.0.1
+
 from inspect import getmembers, isfunction, isclass
 import types
 
 
 class FunctionFactory:
     """
-    This class is meant to return an initialization or activation function by providing its name to a getter method
+    This class is meant to return a function by providing its name to a getter method
     """
     def __init__(self, globals: dict, module_name: str):
         """
