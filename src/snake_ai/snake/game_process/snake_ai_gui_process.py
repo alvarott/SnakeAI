@@ -7,9 +7,10 @@
 
 from snake_ai.snake.snake_controller import AIController
 from snake_ai.snake.game_process.snake_gui_process import SnakeGUIProcess
+from snake_ai.snake.game_process.snake_ai_abc_process import SnakeAIABC
 
 
-class SnakeAIGUI(SnakeGUIProcess):
+class SnakeAIGUI(SnakeGUIProcess, SnakeAIABC):
     """
     Implements a graphical snake process controlled by a NN
     """
@@ -33,7 +34,10 @@ class SnakeAIGUI(SnakeGUIProcess):
         :param output_act: output layer activation function
         :param hidden_act: hidden layers activation function
         """
-        super().__init__(size=size, core=core, dist_calculator=dist_calculator, mode='auto', show_path=show_path,
-                         controller=AIController(input=input, output=output, hidden=hidden, output_init=output_init,
-                                                 bias=bias, bias_init=bias_init, hidden_init=hidden_init,
-                                                 output_act=output_act, hidden_act=hidden_act))
+        controller = AIController(input=input, output=output, hidden=hidden, output_init=output_init, bias=bias,
+                                  bias_init=bias_init, hidden_init=hidden_init, output_act=output_act,
+                                  hidden_act=hidden_act)
+        SnakeGUIProcess.__init__(self, size=size, core=core, dist_calculator=dist_calculator, mode='auto',
+                                 show_path=show_path,
+                                 controller=controller)
+        SnakeAIABC.__init__(self, controller)
