@@ -6,7 +6,7 @@
 
 from snake_ai.snake.snake_controller import GameController
 from snake_ai.snake.game_process.snake_abc_process import SnakeProcess
-from snake_ai.snake.snake_core import SnakeGUIFactory
+from snake_ai.snake.snake_core.snake_gui_core import SnakeGUIFactory
 from pygame import Surface
 from abc import ABC
 
