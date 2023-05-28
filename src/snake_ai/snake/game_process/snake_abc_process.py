@@ -6,7 +6,8 @@
 # Version: 0.0.1
 
 from abc import abstractmethod, ABC
-from snake_ai.snake.snake_core import SnakeCore, SnakeGUI
+from snake_ai.snake.snake_core.snake_core import SnakeCore
+from snake_ai.snake.snake_core.snake_gui_core import SnakeGUI
 from snake_ai.snake.snake_controller import GameController
 
 
