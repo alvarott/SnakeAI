@@ -4,7 +4,7 @@
 # Date: 17/05/2023
 # Version: 0.0.1
 
-from snake_ai import FactoryABS
+from snake_ai.class_factory_abc import FactoryABS
 import snake_ai.snake.vision.dist_concr as distances
 
 
