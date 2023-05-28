@@ -1,1 +1,1 @@
-from .factory_abc import FactoryABS
+from .class_factory_abc import FactoryABS
