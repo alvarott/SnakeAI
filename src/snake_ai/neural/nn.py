@@ -15,6 +15,11 @@ class NN:
     This class provides the functionality necessary to act as a brain of the snake, with a simple implementation of
     a neural network, is not intended to provide a full implementation of a NN capacities
     """
+
+    # Class constants
+    W_NAME = 'layer_'
+    B_NAME = 'bias_'
+
     def __init__(self, input: int, output: int, hidden: list[int], output_init: str, bias: bool,
                  bias_init: str, hidden_init: str, output_act: str, hidden_act: str):
         """
@@ -50,7 +55,9 @@ class NN:
         self._bias_vec = {}
         self._w_matrices = {}
         self._activations = {}
+        self._codification_info: dict[str, int | list[int]] = {}
         self._dense_initialization()
+        self._set_codification()
 
     def __str__(self):
         return f'Inputs nodes  :  {self._input}\n' \
@@ -70,6 +77,27 @@ class NN:
         :return:
         """
         return self.activations
+
+    def _set_codification(self) -> None:
+        """
+        Produces the codification additional information for the weights and biases
+        :return:
+        """
+        # Calculate length of the encoding array
+        length = 0
+        values = list(self._w_matrices.values())
+        biases = list(self._bias_vec.values())
+        slices = []
+        for i in range(len(values)):
+            slice = values[i].size
+            length += slice
+            slices.append(slice)
+            if self._bias:
+                slice = biases[i].size
+                length += slice
+                slices.append(slice)
+        self._codification_info['length'] = length
+        self._codification_info['slices'] = slices
 
     def save_model(self, path: str, name: str) -> int:
         """
@@ -99,8 +127,6 @@ class NN:
         Produces a dense initialization of the NN
         :return:
         """
-        w_name = 'layer_'
-        b_name = 'bias_'
         nodes = list([self._input, *self._hidden, self._output])
         weights = {}
         bias = {}
@@ -109,13 +135,13 @@ class NN:
         for i in range(len(nodes) - 1):
             # If output layer
             if i + 2 == len(nodes):
-                weights[f'{w_name}{i}'] = self._output_init((nodes[i + 1], nodes[i]))
+                weights[f'{NN.W_NAME}{i}'] = self._output_init((nodes[i + 1], nodes[i]))
             # If hidden layer
             else:
-                weights[f'{w_name}{i}'] = self._hidden_init((nodes[i + 1], nodes[i]))
+                weights[f'{NN.W_NAME}{i}'] = self._hidden_init((nodes[i + 1], nodes[i]))
             # Bias
             if self._bias:
-                bias[f'{b_name}{i}'] = self._bias_init((nodes[i + 1], 1))
+                bias[f'{NN.B_NAME}{i}'] = self._bias_init((nodes[i + 1], 1))
 
         self._w_matrices = weights
         self._bias_vec = bias
@@ -141,17 +167,15 @@ class NN:
         else:
             return np.empty(0)
 
-        w_name = 'layer_'
-        b_name = 'bias_'
         activations = {}
         output: np.ndarray = np.empty(0)
         for i in range(len(self._w_matrices)):
             if i == 0:
-                output = np.matmul(self._w_matrices[f'{w_name}{i}'], _input)
+                output = np.matmul(self._w_matrices[f'{NN.W_NAME}{i}'], _input)
             else:
-                output = np.matmul(self._w_matrices[f'{w_name}{i}'], output)
+                output = np.matmul(self._w_matrices[f'{NN.W_NAME}{i}'], output)
             if self._bias:
-                output = output + self._bias_vec[f'{b_name}{i}']
+                output = output + self._bias_vec[f'{NN.B_NAME}{i}']
             if i == len(self._w_matrices) - 1:
                 output = self._output_act(output)
             else:
@@ -173,3 +197,25 @@ class NN:
             if self._bias:
                 encoding = np.concatenate((encoding, biases[i].flatten()))
         return encoding
+
+    def decode(self, nn_code: np.ndarray) -> None:
+        old_w = list(self._w_matrices.values())
+        old_b = list(self._bias_vec.values())
+        slices = self._codification_info['slices']
+        length = self._codification_info['length']
+        slice_count = 0
+        count = 0
+        if nn_code.ndim > 1:
+            raise ValueError("Just 1D-arrays are supported as NN codification")
+        if len(nn_code) != length:
+            raise ValueError(f"Wrong encoding array for this NN expected length={length}"
+                             f".Found: 'len(nn_code)'={len(nn_code)}")
+
+        for i in range(len(old_w)):
+            self._w_matrices[f'{NN.W_NAME}{i}'] = nn_code[slice_count:slice_count + slices[count]].reshape(old_w[i].shape)
+            slice_count += slices[count]
+            count += 1
+            if self._bias:
+                self._bias_vec[f'{NN.B_NAME}{i}'] = nn_code[slice_count:slice_count + slices[count]].reshape(old_b[i].shape)
+                slice_count += slices[count]
+                count += 1
