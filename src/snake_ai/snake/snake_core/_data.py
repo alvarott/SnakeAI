@@ -208,5 +208,5 @@ class StatsStruct:
         Produces a dictionary with all the stats
         :return dict:
         """
-        return dict({'score': self.score, 'moves': self.total_moves, 'turns': self.turns, 'accuracy': self.accuracy,
-                     'efficiency': self.efficiency})
+        return dict({'max_score': self.max_score,'score': self.score, 'moves': self.total_moves, 'turns': self.turns,
+                     'accuracy': self.accuracy, 'efficiency': self.efficiency})
