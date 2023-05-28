@@ -3,9 +3,10 @@
 # Author: Álvaro Torralba
 # Date: 21/05/2023
 # Version: 0.0.1
-
-from pygame import Surface
-import pygame
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
+    from pygame.surface import Surface
 
 
 class NNGraph:
@@ -31,7 +32,6 @@ class NNGraph:
         self._x_centers = self._x_indices()
         self._y_centers = self._y_indices()
         self._points = self._set_points()
-        self._nodes = self._draw_nodes()
 
     def _set_points(self) -> dict[int, list[tuple[float, float]]]:
         """
@@ -103,17 +103,15 @@ class NNGraph:
                     for node in self._points[i]:
                         pygame.draw.line(self._surface, line, node, current, 1)
 
-    def _draw_nodes(self) -> Surface:
+    def _draw_nodes(self):
         """
         Creates and static image with all the nodes
         :return surface: image that contains all the nodes rendering
         """
-        surface = Surface((NNGraph.WIDTH, NNGraph.HEIGHT))
         for nodes in self._points.values():
             for node in nodes:
-                pygame.draw.circle(surface, NNGraph.BLUE_BASE, node, 8)
-                pygame.draw.circle(surface, NNGraph.BLACK, node, 7.5)
-        return surface
+                pygame.draw.circle(self._surface, NNGraph.BLUE_BASE, node, 8)
+                pygame.draw.circle(self._surface, NNGraph.BLACK, node, 7.5)
 
     def draw_nn(self, activations: dict[int, list[float]]) -> Surface:
         """
@@ -123,5 +121,5 @@ class NNGraph:
         """
         self._surface.fill(NNGraph.BLACK)
         self._draw_lines(activations)
-        self._surface.blit(self._nodes, (0, 0))
+        self._draw_nodes()
         return self._surface
