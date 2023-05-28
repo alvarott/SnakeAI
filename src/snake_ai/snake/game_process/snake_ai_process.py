@@ -8,12 +8,16 @@
 from snake_ai.snake.snake_core.snake_core import SnakeCore
 from snake_ai.snake.snake_controller import AIController
 from snake_ai.snake.game_process.snake_abc_process import SnakeProcess
+from snake_ai.snake.game_process.snake_ai_abc_process import SnakeAIABC
 
 
-class SnakeAINOGUI(SnakeProcess):
+class SnakeAI(SnakeProcess, SnakeAIABC):
     """
     Implements the entire game execution in a lightweight manner to optimize the NN training
     """
+    # Object instances counter
+    obj_counter = 1
+
     def __init__(self, size: tuple[int, int], dist_calculator: str, input: int, output: int, hidden: list[int],
                  output_init: str, bias: bool, bias_init: str, hidden_init: str, output_act: str, hidden_act: str
                  ):
@@ -31,24 +35,35 @@ class SnakeAINOGUI(SnakeProcess):
         :param output_act: output layer activation function
         :param hidden_act: hidden layers activation function
         """
-        super().__init__(size=size, core=SnakeCore(size=size, dist_calculator=dist_calculator, mode='auto'),
-                         controller=AIController(input=input, output=output, hidden=hidden, output_init=output_init,
-                                                 bias=bias, bias_init=bias_init, hidden_init=hidden_init,
-                                                 output_act=output_act, hidden_act=hidden_act))
+        controller = AIController(input=input, output=output, hidden=hidden, output_init=output_init, bias=bias,
+                                  bias_init=bias_init, hidden_init=hidden_init, output_act=output_act,
+                                  hidden_act=hidden_act)
+        SnakeProcess.__init__(self, size=size, core=SnakeCore(size=size, dist_calculator=dist_calculator, mode='auto'),
+                              controller=controller)
+        SnakeAIABC.__init__(self, controller)
+        self._id = SnakeAI.obj_counter
+        SnakeAI.obj_counter += 1
 
-    def step(self):
+    @property
+    def id(self) -> int:
+        """
+        Identifier of the class instance
+        :return id:
+        """
+        return self._id
+
+    def step(self) -> None:
         """
         Making use of a snake implementation and a game driver must implement the game data flow logic
         :return:
         """
         super().step(self.core.direction, self.core.vision)
 
-    def simulate(self):
+    def simulate(self) -> tuple[int, dict[str, float]]:
         """
         Runs the entire game loop
         :return:
         """
         while self.running:
             self.step()
-        print(self.stats)
-        return self
+        return self.id, self.stats
