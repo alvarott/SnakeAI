@@ -6,7 +6,9 @@
 
 from snake_ai.snake.snake_controller.controller_abc import GameController
 from snake_ai.snake.enums import GameDirection
-import pygame
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
 
 
 class HumanController(GameController):
