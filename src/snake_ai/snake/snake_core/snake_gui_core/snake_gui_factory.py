@@ -4,7 +4,7 @@
 # Date: 17/05/2023
 # Version: 0.0.1
 
-from snake_ai import FactoryABS
+from snake_ai.class_factory_abc import FactoryABS
 import snake_ai.snake.snake_core.snake_gui_core as gui_core
 
 
@@ -15,7 +15,8 @@ class SnakeGUIFactory(FactoryABS):
     def __init__(self):
         super().__init__(gui_core)
 
-    def get_instance(self, core_name: str, game_size: tuple[int, int], dist_calculator: str, mode: str, show_path: bool) -> gui_core.SnakeGUI:
+    def get_instance(self, core_name: str, game_size: tuple[int, int], dist_calculator: str, mode: str,
+                     show_path: bool) -> gui_core.SnakeGUI:
         """
         Creates an instance of a SnakeCore like object
         :param core_name: name of the snake core to be instantiated
@@ -25,6 +26,8 @@ class SnakeGUIFactory(FactoryABS):
         :param show_path: flag to indicate if the min path must be displayed while rendering
         """
         if core_name in self._classes:
-            return self._classes[core_name](size=game_size, dist_calculator=dist_calculator, mode=mode, show_path=show_path)
+            return self._classes[core_name](size=game_size, dist_calculator=dist_calculator, mode=mode,
+                                            show_path=show_path)
         else:
-            raise ValueError(f"No core implementation found with the name: {core_name}. Found implementations: {self._classes.keys()}")
+            raise ValueError(f"No core implementation found with the name: {core_name}."
+                             f" Found implementations: {self._classes.keys()}")
