@@ -15,7 +15,7 @@ import random
 Cell = namedtuple('Cell', 'row, col')
 
 
-class SnakeCore():
+class SnakeCore:
     """
     Contains the base functionality for the snake
     """
@@ -203,7 +203,6 @@ class SnakeCore():
                     self._spawn_apple()
         else:
             self._stats_data.final_stats()
-
 
     def _set_vision(self) -> None:
         """
