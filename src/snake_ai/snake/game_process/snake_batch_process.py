@@ -32,7 +32,7 @@ class SnakeBatch:
         """
         return individual.simulate()
 
-    def run_all(self) -> None:
+    def run(self) -> None:
         """
         Runs all the individual and collects all the performance results
         :return:
