@@ -49,7 +49,6 @@ class SnakeCore():
         self._grid = np.zeros((self._rows, self._cols))
         self._running = True
         self._completed = False
-        self._spawn = False
         self._stats_data = StatsStruct(rows=self._rows, cols=self._cols)
         self._moves_limit = 0
         self._place_snake()
@@ -57,7 +56,7 @@ class SnakeCore():
         self._set_cmp()
         if self._auto:
             self._set_vision()
-            self._moves_limit = (self._rows + self._cols) * 4
+            self._moves_limit = 100
 
     @property
     def vision(self) -> np.ndarray:
@@ -97,9 +96,6 @@ class SnakeCore():
         :return:
         """
         self._stats_data.cmp = len(self._dist.a_star(self.grid, self.head.pos(), self._apple))
-        # If a path is found, sets the flag to false, avoiding additional calculations.
-        if self._stats_data.cmp > 0:
-            self._spawn = False
 
     def _place_snake(self) -> None:
         """
@@ -128,8 +124,8 @@ class SnakeCore():
         self._apple = Cell(index[0], index[1])
         # Update the apple position in the grid
         self.grid = (self._apple.row, self._apple.col, GridDict.APPLE.value)
-        # Activate flag to calculate minimal path
-        self._spawn = True
+        # calculate minimal path from the head to the apple
+        self._set_cmp()
 
     def _collision(self) -> bool:
         """
@@ -174,32 +170,39 @@ class SnakeCore():
 
         # Update head
         self._snake.add((i, j), direction)
-        # Update tail
-        if not self._grow():
-            self.grid = (self.tail.row, self.tail.col, GridDict.EMPTY.value)
-            self._snake.pop()
-        # Spawn new apple
-        else:
-            score = True
-            self._spawn_apple()
-        # Update stats
-        self._stats_data.add_move(turn=turn, score=score)
-        if self._spawn:
-            self._set_cmp()
-        self._completed = self._stats_data.completed()
         # Check collisions
         if self._collision():
-            self._stats_data.completed()
             self._running = False
-        # Update grid
+        # Kill process if to many steps are being taken
+        if self._auto and self._moves_limit == 0:
+            self._running = False
+        # Update grid head position
         if self._running:
             self.grid = (self.head.row, self.head.col, GridDict.HEAD.value)
             self.grid = (self.head.prev.row, self.head.prev.col, GridDict.BODY.value)
+            # Produce vision for auto-controller
             if self._auto:
                 self._set_vision()
-        # Kill process if to many are being taken
-        if self._auto and self._stats_data.moves == self._moves_limit + self._stats_data.score:
-            self._running = False
+            # Update tail
+            if not self._grow():
+                self.grid = (self.tail.row, self.tail.col, GridDict.EMPTY.value)
+                self._snake.pop()
+                self._moves_limit -= 1
+                self._stats_data.add_move(turn=turn, score=score)
+                # Update current minimum path if necessary
+                if self._stats_data.cmp == 0:
+                    self._set_cmp()
+            # Spawn new apple
+            else:
+                score = True
+                self._stats_data.add_move(turn=turn, score=score)
+                self._moves_limit = 150
+                # Check if the game is completed else spawn a new apple
+                self._completed = self._stats_data.completed()
+                if not self._completed:
+                    self._spawn_apple()
+        else:
+            self._stats_data.final_stats()
 
 
     def _set_vision(self) -> None:
