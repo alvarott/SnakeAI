@@ -197,16 +197,18 @@ class StatsStruct:
         Checks if the maximal punctuation has been reached
         :return bool:
         """
-        self._set_efficiency()
-        self._set_accuracy()
         if self.score == self.max_score:
             return True
         return False
+
+    def final_stats(self):
+        self._set_accuracy()
+        self._set_efficiency()
 
     def get_stats(self) -> dict[str, int | float]:
         """
         Produces a dictionary with all the stats
         :return dict:
         """
-        return dict({'max_score': self.max_score,'score': self.score, 'moves': self.total_moves, 'turns': self.turns,
+        return dict({'max_score': self.max_score, 'score': self.score, 'moves': self.total_moves, 'turns': self.turns,
                      'accuracy': self.accuracy, 'efficiency': self.efficiency})
