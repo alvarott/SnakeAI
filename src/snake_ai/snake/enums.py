@@ -18,15 +18,6 @@ class GridDict(Enum):
     EMPTY = 0
 
 
-class NNVision(Enum):
-    """
-    Enumerate class representing the objects values that are provided to the neural network
-    """
-    WALL = [1.0, 0.0, 0.0]
-    BODY = [0.0, 1.0, 0.0]
-    APPLE = [0.0, 0.0, 1.0]
-
-
 class NNDirection(Enum):
     """
     Enumerate class representing the directions as entries for the NN
