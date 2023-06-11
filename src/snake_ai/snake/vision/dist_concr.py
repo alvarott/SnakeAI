@@ -40,3 +40,16 @@ class Manhattan(ABCDistance):
         x, y = dim[0] - 1, dim[1] - 1
         max_dist = np.sum(np.absolute(np.array([0, 0]) - np.array([x, y])))
         return np.sum(np.absolute(p1 - p2)) / max_dist
+
+
+class Binary(ABCDistance):
+    def dist(self, dim: tuple[int, int], p1: np.ndarray, p2: np.ndarray) -> float:
+        """
+        Just returns one, ones a collision is detected, is it done is this way to be compatible with the previous
+        versions
+        :param dim: grid dimensions
+        :param p1: from point
+        :param p2: to point
+        :return: Binary detection
+         """
+        return 1.0
