@@ -26,7 +26,8 @@ class SnakeHWGUI(SnakeGUI):
         :param mode: flag to indicate the mode: human controlled or auto controlled
         :param show_path: flag to indicate if the min path must be displayed while rendering
         """
-        super().__init__(size=size, img_folder=SnakeHWGUI.IMAGES, dist_calculator=dist_calculator, mode=mode, show_path=show_path)
+        super().__init__(size=size, img_folder=SnakeHWGUI.IMAGES, dist_calculator=dist_calculator, mode=mode,
+                         show_path=show_path)
         self._background: Surface = self._build_background()
         self._apples: list[Surface] = self._load_apples()
         self._apple_idx: float = 0
