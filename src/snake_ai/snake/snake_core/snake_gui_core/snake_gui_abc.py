@@ -13,7 +13,6 @@ import contextlib
 with contextlib.redirect_stdout(None):
     import pygame
     from pygame.surface import Surface
-    from pygame.font import Font
 import os
 
 
