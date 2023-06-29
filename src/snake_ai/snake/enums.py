@@ -60,15 +60,15 @@ class GameSize(Enum):
     """
     Enumerate class containing the possibles grid dimensions
     """
-    SMALL = (10, 10)
+    SMALL = (15, 15)
     MEDIUM = (20, 20)
     LARGE = (25, 25)
 
 
-class GameDifficulty(Enum):
+class GameSpeed(Enum):
     """
     Enumerate class containing the possible game speeds
     """
-    EASY = 10
-    MODERATE = 18
-    HARD = 23
+    SLOW = 10
+    NORMAL = 18
+    FAST = 23
