@@ -8,16 +8,13 @@
 from snake_ai.snake.snake_controller import AIController
 from snake_ai.snake.game_process.snake_gui_process import SnakeGUIProcess
 from snake_ai.snake.game_process.snake_ai_abc_process import SnakeAIABC
-
+from snake_ai.neural.nn import NN
 
 class SnakeAIGUI(SnakeGUIProcess, SnakeAIABC):
     """
     Implements a graphical snake process controlled by a NN
     """
-    def __init__(self, size: tuple[int, int], core: str, dist_calculator: str, show_path: bool, input: int,
-                 output: int, hidden: list[int], output_init: str, bias: bool, bias_init: str, hidden_init: str,
-                 output_act: str, hidden_act: str
-                 ):
+    def __init__(self, size: tuple[int, int], core: str, dist_calculator: str, show_path: bool, brain: NN):
         """
         Constructor
         :param size: game grid size
@@ -34,9 +31,10 @@ class SnakeAIGUI(SnakeGUIProcess, SnakeAIABC):
         :param output_act: output layer activation function
         :param hidden_act: hidden layers activation function
         """
-        controller = AIController(input=input, output=output, hidden=hidden, output_init=output_init, bias=bias,
-                                  bias_init=bias_init, hidden_init=hidden_init, output_act=output_act,
-                                  hidden_act=hidden_act)
+        controller = AIController(input=1, output=1, hidden=[1], output_init='he', bias=False,
+                                  bias_init='he', hidden_init='he', output_act='relu',
+                                  hidden_act='relu')
+        controller.brain = brain
         SnakeGUIProcess.__init__(self, size=size, core=core, dist_calculator=dist_calculator, mode='auto',
                                  show_path=show_path,
                                  controller=controller)
