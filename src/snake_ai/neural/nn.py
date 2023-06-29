@@ -6,8 +6,6 @@
 
 from snake_ai.neural.nn_functions import NNFunctionFactory
 import numpy as np
-import pickle
-import os
 
 
 class NN:
@@ -71,12 +69,19 @@ class NN:
                f'Hidden act    :  {self._hidden_act.__name__}\n'
 
     @property
+    def layers(self):
+        layers = list(self._hidden)
+        layers.insert(0, self._input)
+        layers.append(self._output)
+        return layers
+
+    @property
     def activations(self) -> dict[int, list[float]]:
         """
         Holds the last forward propagation outputs
         :return:
         """
-        return self.activations
+        return self._activations
 
     def _set_codification(self) -> None:
         """
@@ -98,29 +103,6 @@ class NN:
                 slices.append(slice)
         self._codification_info['length'] = length
         self._codification_info['slices'] = slices
-
-    def save_model(self, path: str, name: str) -> int:
-        """
-        Saves the NN object instance as a binary file
-        :param path: path where to save the file
-        :param name: file name
-        :return:
-        """
-        with open(os.path.join(path, name), 'wb') as file:
-            pickle.dump(self, file)
-        return 0
-
-    @staticmethod
-    def load_model(filename: str):
-        """
-        Creates an instances of a NN object loaded from a file
-        :param filename: absolute file path
-        :return: NN object instance
-        """
-        path = os.path.normpath(filename)
-        with open(path, 'rb') as file:
-            model = pickle.load(file)
-        return model
 
     def _dense_initialization(self) -> None:
         """
