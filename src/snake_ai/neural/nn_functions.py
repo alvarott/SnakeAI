@@ -58,8 +58,8 @@ class _Activation:
         :param matrix: matrix on which to apply softmax
         :return relu: a matrix with the same dimensions with the softmax function applied element wise
         """
-        shifted_matrix = matrix - np.max(matrix)
-        exp = np.exp(shifted_matrix)
+        #shifted_matrix = matrix - np.max(matrix)
+        exp = np.exp(matrix)
         return exp / np.sum(exp)
 
 

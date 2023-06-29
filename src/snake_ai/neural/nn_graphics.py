@@ -17,21 +17,25 @@ class NNGraph:
     BLUE_LINE_MID = (9, 37, 43)
     BLUE_LINE_WEAK = (56, 67, 69)
     BLACK = (0, 0, 0)
-    WIDTH = 900
-    HEIGHT = 900
+    WIDTH = 960
+    HEIGHT = 1080
 
     def __init__(self, layers: list[int]):
         """
         Constructor
         :param layers: list with number of nodes in each layer
         """
-        self._surface = Surface((NNGraph.WIDTH, NNGraph.HEIGHT))
+        self._surface = Surface((NNGraph.WIDTH, NNGraph.HEIGHT), pygame.SRCALPHA)
         self._layers = layers
         self._y_mid = NNGraph.HEIGHT / 2
         self._rect = 20
         self._x_centers = self._x_indices()
         self._y_centers = self._y_indices()
         self._points = self._set_points()
+
+    @property
+    def surface(self):
+        return self._surface
 
     def _set_points(self) -> dict[int, list[tuple[float, float]]]:
         """
@@ -92,13 +96,8 @@ class NNGraph:
         for i in range(len(activations)):
             points = self._points[i + 1]
             for j in range(len(activations[i])):
-                if activations[i][j] > 0:
-                    if 0 < activations[i][j] < 0.3:
-                        line = NNGraph.BLUE_LINE_WEAK
-                    elif 0.3 < activations[i][j] < 0.6:
-                        line = NNGraph.BLUE_LINE_MID
-                    else:
-                        line = NNGraph.BLUE_LINE_STR
+                if activations[i][j] > 0.5:
+                    line = NNGraph.BLUE_LINE_STR
                     current = points[j]
                     for node in self._points[i]:
                         pygame.draw.line(self._surface, line, node, current, 1)
@@ -119,7 +118,7 @@ class NNGraph:
         :param activations: output of each layer after forward propagation
         :return surface: rendering of the NN
         """
-        self._surface.fill(NNGraph.BLACK)
+        self._surface = Surface((NNGraph.WIDTH, NNGraph.HEIGHT), pygame.SRCALPHA)
         self._draw_lines(activations)
         self._draw_nodes()
         return self._surface
