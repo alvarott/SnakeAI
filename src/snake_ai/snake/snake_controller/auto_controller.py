@@ -16,8 +16,8 @@ class AIController(GameController):
     """
     def __init__(self, input: int, output: int, hidden: list[int], output_init: str, bias: bool, bias_init: str,
                  hidden_init: str, output_act: str, hidden_act: str):
-        self._nn = NN(input=input, output=output, hidden=hidden, output_init=output_init, bias=bias, bias_init=bias_init,
-                      hidden_init=hidden_init, output_act=output_act, hidden_act=hidden_act)
+        self._nn = NN(input=input, output=output, hidden=hidden, output_init=output_init, bias=bias,
+                      bias_init=bias_init, hidden_init=hidden_init, output_act=output_act, hidden_act=hidden_act)
 
     @property
     def nn_code(self) -> np.ndarray:
@@ -43,6 +43,27 @@ class AIController(GameController):
         :return: dictionary containing the values of each layer
         """
         return self._nn.activations
+
+    @property
+    def brain(self) -> NN:
+        """
+        NN instance that controls the snake
+        :return:
+        """
+        return self._nn
+
+    @brain.setter
+    def brain(self, new_brain: NN) -> None:
+        """
+        NN setter
+        :param new_brain:
+        :return:
+        """
+        self._nn = new_brain
+
+    @property
+    def layers(self):
+        return self._nn.layers
 
     def action(self, current_dir: GameDirection,  vision: np.ndarray) -> GameDirection:
         """
