@@ -40,3 +40,24 @@ class SnakeAIABC(ABC):
         :return:
         """
         return self._controller.nn_activation
+
+    @property
+    def brain(self):
+        """
+        NN that controls the snake
+        :return:
+        """
+        return self._controller.brain
+
+    @brain.setter
+    def brain(self, new_brain):
+        """
+        Sets the NN that controls the snake
+        :param new_brain:
+        :return:
+        """
+        self._controller.brain = new_brain
+
+    @property
+    def layers(self):
+        return self._controller.layers
