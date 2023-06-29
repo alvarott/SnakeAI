@@ -7,7 +7,6 @@
 
 from snake_ai.genetic.genetic_functions import GAFunctionFactory
 import numpy as np
-import math
 import random
 
 
@@ -46,7 +45,8 @@ class GA:
         # Select parents and form couples
         if offspring % 2 != 0:
             offspring += 1
-        parents = self._selection(num_parents=offspring, population_fitness=population_fitness)
+        parents = self._selection(num_parents=offspring, population_fitness=population_fitness, tournament_size=2
+                                  )
         couples = GA.coupling(parents)
         parents = {key: population[key] for key in parents}
         # Produce children
@@ -62,7 +62,6 @@ class GA:
            children[i] = self._mutation(children[i], self._mutation_rate, sigma)
         # Replacement
         sorted_population = [k for k, v in sorted(population_fitness.items(), key=lambda item: item[1])]
-        print(population_fitness[sorted_population[-1]])
         for i in range(offspring):
             population[sorted_population[i]] = children[i]
         return sorted_population[-1]
@@ -75,7 +74,7 @@ if __name__ == '__main__':
                    output_init='he',
                    hidden_init='he', output_act='softmax', hidden_act='relu')
     b = c.get_population()
-    a = GA(selection='tournament', fitness='fitness1', crossover='whole_arithmetic', crossover_rate=0.9, mutation='gaussian', mutation_rate=0.05)
+    a = GA(selection='tournament', fitness='fitness1', crossover='uniform', crossover_rate=0.9, mutation='gaussian', mutation_rate=0.05)
     c.run()
     scores = c.results
 
