@@ -45,7 +45,6 @@ class SnakeGUI(SnakeCore, ABC):
         self._surface = Surface(self._dim)
         self._min_path: list[tuple[int, int]] = []
         self._images: dict[str, Surface] = {}
-        self._fonts: dict[str, Font] = {}
         self._load_resources(img_folder)
 
     def _render_min_pth(self, surface: Surface):
@@ -73,11 +72,6 @@ class SnakeGUI(SnakeCore, ABC):
                         source.joinpath(file.name).open('br')).convert_alpha()
                 except pygame.error:
                     raise pygame.error("Pygame display module must be initialized and set before processing images")
-        # Load fonts
-        source = rc.files(rsc).joinpath('fonts')
-        with os.scandir(source) as files:
-            for file in files:
-                self._fonts[file.name[0:file.name.index('.')]] = pygame.font.Font(source.joinpath(file.name).open('br'), 25)
 
     @property
     def a_star(self):

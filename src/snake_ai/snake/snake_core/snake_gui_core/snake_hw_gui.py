@@ -93,9 +93,6 @@ class SnakeHWGUI(SnakeGUI):
                     name = f'body_{current.dir[0].value}'
                 surface.blit(self._images[name], SnakeGUI._cell_to_pixels(current.pos()))
             current = current.next
-        # Render scoreboard
-        score = self._fonts['pixel_font'].render(f"Score: {self._stats_data.score}", True, (255, 205, 255))
-        surface.blit(score, (self._width - score.get_width(), 0))
         self._surface = surface
 
     def _render_apple(self, surface: Surface):

@@ -24,7 +24,8 @@ class SnakeLWGUI(SnakeGUI):
         :param mode: flag to indicate the mode: human controlled or auto controlled
         :param show_path: flag to indicate if the min path must be displayed while rendering
         """
-        super().__init__(size=size, img_folder=SnakeLWGUI.IMAGES, dist_calculator=dist_calculator, mode=mode, show_path=show_path)
+        super().__init__(size=size, img_folder=SnakeLWGUI.IMAGES, dist_calculator=dist_calculator, mode=mode,
+                         show_path=show_path)
         self._background: Surface = self._build_background()
         self.render_surface()
 
@@ -61,7 +62,4 @@ class SnakeLWGUI(SnakeGUI):
         for _ in range(self._snake.length-1):
             surface.blit(self._images['body'], SnakeGUI._cell_to_pixels(current.pos()))
             current = current.next
-        # Render scoreboard
-        score = self._fonts['pixel_font'].render(f"Score: {self._stats_data.score}", True, (255, 205, 255))
-        surface.blit(score, (self._width - score.get_width(), 0))
         self._surface = surface
