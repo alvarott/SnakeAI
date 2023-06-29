@@ -9,7 +9,7 @@ from snake_ai.snake.game_displayer.game_vsai_displayer import GameVSAIDisplayer
 from snake_ai.snake.game_displayer.game_model_displayer import GameModelDisplayer
 from snake_ai.gui.start_win import StartWindow
 from snake_ai.gui.main_menu_win import MainMenuWindow
-from snake_ai.gui.vs_ai_config_win import GameConfigWindow
+from snake_ai.gui.game_config_win import GameConfigWindow
 import customtkinter as ctk
 
 class GUIMediator:
