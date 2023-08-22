@@ -11,6 +11,7 @@ from snake_ai.snake.vision import GridOps
 from collections import namedtuple
 import numpy as np
 import random
+import math
 
 Cell = namedtuple('Cell', 'row, col')
 
@@ -21,13 +22,12 @@ class SnakeCore:
     """
 
     # Class constants
-    MODES = {'human', 'auto'}
+    MODES = {'human', 'autoT', 'autoP'}
 
-    def __init__(self, size: tuple[int, int], dist_calculator: str, mode: str):
+    def __init__(self, size: tuple[int, int], mode: str, vision: str):
         """
         Constructor
         :param size: Grid size
-        :param dist_calculator: the name of one the implemented distances calculator
         :param mode: flag to indicate if the extra calculations for NN controlling must be processed
         :param
         """
@@ -36,12 +36,13 @@ class SnakeCore:
         if mode not in SnakeCore.MODES:
             raise ValueError(f"Mode {mode} not supported. Supported modes {SnakeCore.MODES}")
         # Create flag for auto player calculations
-        elif mode == 'auto':
+        elif mode in ['autoT', 'autoP']:
             self._auto = True
         else:
             self._auto = False
+        self._vision_type = vision
         self._vision: np.ndarray = np.empty(0)
-        self._dist = GridOps(dist_calculator)
+        self._dist = GridOps(vision)
         self._rows = size[0]
         self._cols = size[1]
         self._snake = BlockLinkedList()
@@ -51,12 +52,22 @@ class SnakeCore:
         self._completed = False
         self._stats_data = StatsStruct(rows=self._rows, cols=self._cols)
         self._moves_limit = 0
+        self._last_turn = None
         self._place_snake()
         self._spawn_apple()
         self._set_cmp()
         if self._auto:
             self._set_vision()
-            self._moves_limit = 100
+            self._moves_limit = (math.ceil(3 * self._stats_data.cmp) if mode == 'autoT'
+                                 else math.ceil((self._rows * self._cols) * 1.5))
+
+    @property
+    def vision_type(self):
+        return self._vision_type
+
+    @property
+    def auto(self):
+        return self._auto
 
     @property
     def vision(self) -> np.ndarray:
@@ -180,9 +191,6 @@ class SnakeCore:
         if self._running:
             self.grid = (self.head.row, self.head.col, GridDict.HEAD.value)
             self.grid = (self.head.prev.row, self.head.prev.col, GridDict.BODY.value)
-            # Produce vision for auto-controller
-            if self._auto:
-                self._set_vision()
             # Update tail
             if not self._grow():
                 self.grid = (self.tail.row, self.tail.col, GridDict.EMPTY.value)
@@ -195,12 +203,17 @@ class SnakeCore:
             # Spawn new apple
             else:
                 score = True
+                self._moves_limit = math.ceil((self._rows * self._cols) * 1.5)
                 self._stats_data.add_move(turn=turn, score=score)
-                self._moves_limit = 150
                 # Check if the game is completed else spawn a new apple
                 self._completed = self._stats_data.completed()
                 if not self._completed:
                     self._spawn_apple()
+                else:
+                    self._stats_data.final_stats()
+            # Produce vision for auto-controller
+            if self._auto:
+                self._set_vision()
         else:
             self._stats_data.final_stats()
 
@@ -213,4 +226,6 @@ class SnakeCore:
         axis = self._dist.vision(self.grid)
         head_dir = NNDirection[self.head.dir[0].name].value
         tail_dir = NNDirection[self.tail.dir[0].name].value
-        self._vision = np.concatenate((axis, head_dir, tail_dir))
+        snake_space = self._snake.length / (self._rows * self._cols)
+        grid_space = [1 - snake_space, snake_space]
+        self._vision = np.concatenate((axis, head_dir, tail_dir, grid_space))
