@@ -27,7 +27,7 @@ class SnakeGUI(SnakeCore, ABC):
     # Class constants
     BLOCK_SIZE = 30
 
-    def __init__(self, size: tuple[int, int], img_folder: str, dist_calculator: str, mode: str, show_path: bool = False):
+    def __init__(self, size: tuple[int, int], img_folder: str, mode: str, vision: str, show_path: bool = False):
         """
         Constructor
         :param size: Size of the grid
@@ -36,7 +36,7 @@ class SnakeGUI(SnakeCore, ABC):
         :param mode: flag to indicate the mode: human controlled or auto controlled
         :param show_path: flag to indicate if the min path must be displayed while rendering
         """
-        super().__init__(size=size, dist_calculator=dist_calculator, mode=mode)
+        super().__init__(size=size, mode=mode, vision=vision)
         self._width = self._cols * SnakeGUI.BLOCK_SIZE
         self._height = self._rows * SnakeGUI.BLOCK_SIZE
         self._dim = (self._width, self._height)
@@ -64,7 +64,7 @@ class SnakeGUI(SnakeCore, ABC):
         """
         # Load images and fonts
         source = rc.files(rsc).joinpath(f'images/{images_path}')
-        with os.scandir(source) as files:
+        with os.scandir(str(source)) as files:
             for file in files:
                 try:
                     self._images[file.name[0:file.name.index('.')]] = pygame.image.load(

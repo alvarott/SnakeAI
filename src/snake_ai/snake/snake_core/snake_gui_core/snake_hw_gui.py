@@ -18,7 +18,7 @@ class SnakeHWGUI(SnakeGUI):
     # Class constant
     IMAGES = 'ext_gui'
 
-    def __init__(self, size: tuple[int, int], dist_calculator: str, mode: str, show_path: bool = False):
+    def __init__(self, size: tuple[int, int], mode: str, vision: str, show_path: bool = False):
         """
         Constructor
         :param size: grid size
@@ -26,8 +26,7 @@ class SnakeHWGUI(SnakeGUI):
         :param mode: flag to indicate the mode: human controlled or auto controlled
         :param show_path: flag to indicate if the min path must be displayed while rendering
         """
-        super().__init__(size=size, img_folder=SnakeHWGUI.IMAGES, dist_calculator=dist_calculator, mode=mode,
-                         show_path=show_path)
+        super().__init__(size=size, img_folder=SnakeHWGUI.IMAGES,  mode=mode, show_path=show_path, vision=vision)
         self._background: Surface = self._build_background()
         self._apples: list[Surface] = self._load_apples()
         self._apple_idx: float = 0
