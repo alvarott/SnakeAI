@@ -24,4 +24,5 @@ class DistanceFactory(FactoryABS):
         if distance_name in self._classes:
             return self._classes[distance_name]()
         else:
-            raise ValueError(f"No implementation found with the name: {distance_name}. Found implementations: {self._classes.keys()}")
+            raise ValueError(f"No implementation found with the name: {distance_name}."
+                             f" Found implementations: {self._classes.keys()}")
