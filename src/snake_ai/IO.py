@@ -11,7 +11,6 @@ import os
 
 
 class IO:
-
     @staticmethod
     def _calculate_checksum(data: bytes):
         """
@@ -40,6 +39,7 @@ class IO:
         """
         Loads and object
         :param file_path: absolute file path
+        :param obj_class: type of the object to be load
         :return: object instance
         """
         path = os.path.normpath(file_path)
