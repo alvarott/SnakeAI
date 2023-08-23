@@ -82,6 +82,9 @@ class WindowABC(ABC):
 
 
     class _NextWinButton(ButtonABC):
+        """
+        Defines a custom button class to be used inside the windows
+        """
         def __init__(self, command: FunctionType | Any, **kwargs):
             super().__init__(**kwargs)
             self.command = command

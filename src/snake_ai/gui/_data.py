@@ -67,6 +67,9 @@ class GeneticConfig:
 
 @dataclass
 class Colors:
+    """
+    Dataclass to hold the colors used along the GUI
+    """
     active_text: str = '#dce4ee'
     inactive_text: str = '#5d5f61'
     bg_grey = '#2b2b2b'
@@ -82,6 +85,9 @@ class Colors:
 
 
 class DropDownMapping:
+    """
+    Dataclass used for mapping the names displayed inside the GUI a then translation to function parameters
+    """
     def __init__(self):
         self.mapping = {'binary': 'Binary', 'real': 'Real', 'glorot': 'Xavier Glorot', 'he': 'He', 'lecun': 'LeCun',
                         'relu': 'ReLu', 'tanh': 'TanH', 'softmax': 'Softmax', 'sigmoid': 'Sigmoid', 'zero': 'Zero',
@@ -93,6 +99,9 @@ class DropDownMapping:
 
 
 class GAShortNames:
+    """
+    Dataclass used to translate the parameters to an abbreviated form for fitting inside the training window
+    """
     def __init__(self):
         self.names_map = {'roulette_wheel': 'RW', 'stochastic': 'stochastic', 'tournament': 'tournament',
                           'whole_arithmetic': 'WA', 'sp_arithmetic': 'SPA', 'sbx': 'SBX',

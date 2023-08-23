@@ -25,15 +25,20 @@ class ButtonABC(ABC, ctk.CTkButton):
         self.configure(command=self._click_event)
 
     @property
-    def value(self):
-        return self._variable.get()
+    def value(self) -> None | int | float | bool | str:
+        """
+        Returns the value held by the variable associated with the button if any
+        :return:
+        """
+        return None if self._variable is None else self._variable.get()
 
     @value.setter
-    def value(self, new_value):
-        self._variable.set(new_value)
+    def value(self, new_value) -> None :
+        if self._variable is not None:
+            self._variable.set(new_value)
 
     @abstractmethod
-    def _click_event(self, *args, **kwargs):
+    def _click_event(self, *args, **kwargs) -> None:
         """
         This method defines the behavior of the button when it is pressed
         :param args: any positional parameter needed
