@@ -27,7 +27,7 @@ class WindowABC(ABC):
         :param theme: selected theme
         """
         ctk.set_appearance_mode(theme)
-        if top_level == None:
+        if top_level is None:
             self._window = ctk.CTk()
         else:
             self._window = ctk.CTkToplevel(top_level)
