@@ -28,38 +28,30 @@ class _Fitness:
         :param individuals: lists with individuals id's and them performance stats
         :return results: dictionary with the individual id and its fitness value pairs
         """
-        def function(max_score: float, score: float, efficiency: float, moves: float, turns: float):
+        def function(max_score: float, score: float, efficiency: float, moves: float):
             """
             Auxiliary function that contains the mathematical logic of the fitness function
             :param max_score: maximum possible score
             :param score: real score
             :param efficiency: efficiency as the average of steps taken in relation with the minimum possible path
             :param moves: number of total moves
-            :param turns: number of total turns
             :return fitness:  fitness value
             """
-            #fitness = moves + (2 ** score + score**2.1*500)- (score**1.2*(0.25*moves)**1.25)
-            # fitness = score ** 5 + (moves ** 2 - (0.7*turns) ** 1.8)/100
-            #fitness = (score ** 5 + score ** 5 * efficiency + moves ** 2 )
-            #fitness = moves ** 5 * efficiency
-            fitness = score ** 5 + (moves / 100 ) ** 5
-            #fitness = (moves ** 3 * efficiency) / 1000000
-            return fitness
+            fitness = (score ** 5 + (moves / 100) ** 5)
+            extra = 0
+            if score == max_score:
+                extra = (score * efficiency) ** 5
+            return fitness + extra
+
         results: dict[int, float] = {}
-        max_fitness = 0
-        best = {}
+        # Calculate population's fitness
         for individual in individuals:
             max_score = individual[1]['max_score']
             score = individual[1]['score']
             effi = individual[1]['efficiency']
             moves = individual[1]['moves']
-            turns = individual[1]['turns']
-            fitness = function(max_score, score, effi, moves, turns)
-            if fitness > max_fitness:
-                max_fitness = fitness
-                best = individual
-            results[individual[0]] = function(max_score, score, effi, moves, turns)
-        print(f'best = {max_fitness}, values = {best}')
+            fitness = function(max_score, score, effi, moves)
+            results[individual[0]] = fitness
         return results
 
 
@@ -132,19 +124,6 @@ class _Selection:
             parents.append(winner)
         return parents
 
-    @staticmethod
-    def coupling(parents: list[int]):
-        if len(parents) % 2 != 0:
-            raise ValueError('Pairing just support a even number of parents')
-        population = list(parents)
-        couples = []
-        for _ in range(len(parents) // 2):
-            p1 = random.randint(0, len(population) -1)
-            p1 = population.pop(p1)
-            p2 = random.randint(0, len(population) -1)
-            p2 = population.pop(p2)
-            couples.append((p1,p2))
-        return couples
 
 class _Crossover:
     """
@@ -202,19 +181,17 @@ class _Crossover:
 
         For large values of eta there is a higher probability that offspring will be created near the parents.
         For small values of eta, offspring will be more distant from parents
-
-        Equation 9.9, 9.10, 9.11
-        @TODO: Study the case
+        Source :
         """
-        # Calculate Gamma (Eq. 9.11)
+        # Calculate Gamma
         rand = np.random.random(parent1.shape)
         gamma = np.empty(parent1.shape)
-        gamma[rand <= 0.5] = (2 * rand[rand <= 0.5]) ** (1.0 / (eta + 1))  # First case of equation 9.11
+        gamma[rand <= 0.5] = (2 * rand[rand <= 0.5]) ** (1.0 / (eta + 1))  # First case
         gamma[rand > 0.5] = (1.0 / (2.0 * (1.0 - rand[rand > 0.5]))) ** (1.0 / (eta + 1))  # Second case
 
-        # Calculate Child 1 chromosome (Eq. 9.9)
+        # Calculate Child 1 chromosome
         chromosome1 = 0.5 * ((1 + gamma) * parent1 + (1 - gamma) * parent2)
-        # Calculate Child 2 chromosome (Eq. 9.10)
+        # Calculate Child 2 chromosome
         chromosome2 = 0.5 * ((1 - gamma) * parent1 + (1 + gamma) * parent2)
 
         return [chromosome1, chromosome2]
@@ -238,51 +215,3 @@ class _Mutation:
         mutation = np.random.normal(loc=0, scale=sigma, size=individual.shape)
         individual = np.where(mask, individual + mutation, individual)
         return individual
-
-
-if __name__ == '__main__':
-
-    scores = [
-            (1, {'max_score': 97, 'score': 5, 'moves': 6, 'turns': 2, 'accuracy': 0, 'efficiency': 0}) ,
-            (2, {'max_score': 97, 'score': 20, 'moves': 12, 'turns': 3, 'accuracy': 0, 'efficiency': 0}) ,
-            (3, {'max_score': 97, 'score': 13, 'moves': 80, 'turns': 80, 'accuracy': 0, 'efficiency': 0}) ,
-            (4, {'max_score': 97, 'score': 0, 'moves': 12, 'turns': 12, 'accuracy': 0, 'efficiency': 0}) ,
-            (5, {'max_score': 97, 'score': 17, 'moves': 8, 'turns': 1, 'accuracy': 0, 'efficiency': 0}) ,
-            (6, {'max_score': 97, 'score': 26, 'moves': 13, 'turns': 7, 'accuracy': 0, 'efficiency': 0}) ,
-            (7, {'max_score': 97, 'score': 26, 'moves': 80, 'turns': 80, 'accuracy': 0, 'efficiency': 0}) ,
-            (8, {'max_score': 97, 'score': 26, 'moves': 6, 'turns': 0, 'accuracy': 0, 'efficiency': 0}) ,
-            (9, {'max_score': 97, 'score': 5, 'moves': 29, 'turns': 23, 'accuracy': 0, 'efficiency': 0}),
-            (10, {'max_score': 97, 'score': 15, 'moves': 80, 'turns': 80, 'accuracy': 0, 'efficiency': 0}) ,
-            (11, {'max_score': 97, 'score': 22, 'moves': 6, 'turns': 0, 'accuracy': 0, 'efficiency': 0}) ,
-            (12, {'max_score': 97, 'score': 50, 'moves': 6, 'turns': 0, 'accuracy': 0.010309278350515464, 'efficiency': 1.0}) ,
-            ]
-    from snake_ai.snake.game_process.snake_batch_process import SnakeBatch
-    import multiprocessing
-    a = SnakeBatch(12, multiprocessing.cpu_count(), (10, 10), 'Manhattan', 40, 3, [2], bias=True, bias_init='he',
-                   output_init='he',
-                   hidden_init='he', output_act='softmax', hidden_act='tanh')
-    b = a.get_population()
-    fitness = GAFunctionFactory().get_function('fitness', 'fitness1')
-    selection = GAFunctionFactory().get_function('selection', 'tournament')
-    cross = GAFunctionFactory().get_function('crossover', 'whole_arithmetic')
-    f = fitness(scores)
-    sorted_dict = {k: v for k, v in sorted(f.items(), key=lambda item: item[1])}
-    print(sorted_dict)
-    s = selection(20, f,3)
-    print(s)
-    print(_Selection.coupling(s))
-
-
-
-
-    individual = np.random.uniform(-1, 1, 10)
-    individual2 = np.random.uniform(-1, 1, 10)
-    print(list(individual))
-    print(list(individual2),'\n')
-
-    cross(individual, individual2, 0.4
-          )
-    print([0.0] * 4)
-
-    for i in range(-1 , 2 , 2):
-        print(i)
