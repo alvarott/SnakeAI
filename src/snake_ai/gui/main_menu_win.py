@@ -5,43 +5,77 @@
 # Version: 0.0.1
 
 from snake_ai.gui.abc_win import WindowABC
+from snake_ai.gui import resources as rsc
+from importlib import resources as rc
+from snake_ai.gui._data import Colors
 import customtkinter as ctk
+from PIL import Image
+import os
 
 
 class MainMenuWindow(WindowABC):
     def __init__(self, top_level: ctk.CTk, mediator):
         super().__init__(size=(300, 400), resizeable=False, top_level=top_level, mediator=mediator)
-        self.set_layout(columns=1, columns_weight=1, rows=7, rows_weights=1, uniform='main_menu')
+        # Button images
+        self._images = {}
+        self._load_images()
         # Frame container
         self._options_frame = ctk.CTkFrame(self.window)
-        # Frame grid division
-        self._options_frame.columnconfigure(index=0, weight=1, uniform='s')
-        for row in range(4):
-            self._options_frame.rowconfigure(index=row, weight=1, uniform='s')
-        self._options_frame.grid(column=0, row=1, rowspan=4, sticky='nsew', padx=15, pady=5)
+        self._options_frame.pack(expand=True, fill='both')
         # VS_AI button
-        self._vs_ai_button = self._NextWinButton(master=self._options_frame, text='Play vs AI', font=self._buttons_font,
-                                                 command=self._mediator.main_to_vsai)
-        self._vs_ai_button.grid(column=0, row=0, sticky='nsew', padx=10, pady=5)
+        self._vs_ai_button = self._NextWinButton(master=self._options_frame, text='     Play vs AI ',
+                                                 font=self._buttons_font,
+                                                 command=self._mediator.main_to_vsai,
+                                                 image=self._images['joystick'], compound='left',
+                                                 corner_radius=0,
+                                                 fg_color=Colors.bg_grey,
+                                                 hover_color=Colors.entry_grey)
+        self._vs_ai_button.pack(expand=True, fill='both')
         # Try Model button
-        self._try_model_button = self._NextWinButton(master=self._options_frame, text='Test Model',
-                                                     font=self._buttons_font, command=self._mediator.main_to_try_model)
-        self._try_model_button.grid(column=0, row=1, sticky='nsew', padx=10, pady=5)
+        self._try_model_button = self._NextWinButton(master=self._options_frame, text='     Test Model ',
+                                                     font=self._buttons_font, command=self._mediator.main_to_try_model,
+                                                     image=self._images['snake'], compound='left',
+                                                     corner_radius=0,
+                                                     fg_color=Colors.bg_grey,
+                                                     hover_color=Colors.entry_grey
+                                                     )
+        self._try_model_button.pack(expand=True, fill='both')
         # Train Model button
-        self._train_model_button = self._NextWinButton(master=self._options_frame, text='Train Model',
+        self._train_model_button = self._NextWinButton(master=self._options_frame, text='     Train Model',
                                                        font=self._buttons_font,
-                                                       command=self._mediator.training_config_window)
-        self._train_model_button.grid(column=0, row=2, sticky='nsew', padx=10, pady=5)
+                                                       command=self._mediator.main_to_training_config,
+                                                       image=self._images['dumbbell'], compound='left',
+                                                       corner_radius=0,
+                                                       fg_color=Colors.bg_grey,
+                                                       hover_color=Colors.entry_grey
+                                                       )
+        self._train_model_button.pack(expand=True, fill='both')
         # Statistics button
-        self._check_stats_button = self._NextWinButton(master=self._options_frame, text='Statistics',
-                                                     font=self._buttons_font, command=self._mediator.statistics_window)
-        self._check_stats_button.grid(column=0, row=3, sticky='nsew', padx=10, pady=5)
-        # Title
-        self._menu_title = ctk.CTkLabel(master=self._window, text='Main Menu', font=self._title_font)
-        self._menu_title.grid(column=0, row=0, pady=2, sticky='s')
+        self._check_stats_button = self._NextWinButton(master=self._options_frame, text='     Statistics ',
+                                                       font=self._buttons_font,
+                                                       command=self._mediator.statistics_window,
+                                                       image=self._images['plot'], compound='left',
+                                                       corner_radius=0,
+                                                       fg_color=Colors.bg_grey,
+                                                       hover_color=Colors.entry_grey
+                                                       )
+        self._check_stats_button.pack(expand=True, fill='both')
         # Exit button
-        self._exit_button = self._NextWinButton(master=self._window, text='Exit', border_color='grey',
-                                                border_width=2, font=self._buttons_font, command=self._mediator.exit)
-        self._exit_button.grid(column=0, row=5, pady=10, rowspan=2)
+        self._exit_button = self._NextWinButton(master=self._options_frame, text='     Exit       ',
+                                                font=self._buttons_font,
+                                                command=self._mediator.exit,
+                                                image=self._images['exit'], compound='left',
+                                                fg_color=Colors.bg_grey,
+                                                hover_color=Colors.entry_grey
+                                                )
+        self._exit_button.pack(expand=True, fill='both')
         self.window.lift()
 
+    def _load_images(self):
+        source = str(rc.files(rsc))
+        with os.scandir(source) as files:
+            for file in files:
+                if '.png' in file.name:
+                    raw_image = Image.open(os.path.join(source, file.name))
+                    image = ctk.CTkImage(raw_image, size=(30,30))
+                    self._images[file.name[0:file.name.index('.')]] = image

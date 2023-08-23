@@ -33,7 +33,7 @@ class ButtonABC(ABC, ctk.CTkButton):
         return None if self._variable is None else self._variable.get()
 
     @value.setter
-    def value(self, new_value) -> None :
+    def value(self, new_value) -> None:
         if self._variable is not None:
             self._variable.set(new_value)
 
