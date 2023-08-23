@@ -3,6 +3,9 @@
 # Author: Álvaro Torralba
 # Date: 21/05/2023
 # Version: 0.0.1
+
+from snake_ai.snake import resources as rsc
+from importlib import resources as rc
 import contextlib
 with contextlib.redirect_stdout(None):
     import pygame
@@ -16,15 +19,22 @@ class NNGraph:
     BLUE_LINE_STR = (0, 202, 252)
     BLUE_LINE_MID = (9, 37, 43)
     BLUE_LINE_WEAK = (56, 67, 69)
+    WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     WIDTH = 960
     HEIGHT = 1080
 
-    def __init__(self, layers: list[int]):
+    def __init__(self, layers: list[int], input_labels: list[str] = None, output_labels: list[str] = None):
         """
         Constructor
         :param layers: list with number of nodes in each layer
         """
+        if input_labels is not None and layers[0] != len(input_labels):
+            raise ValueError("Labels length for input layer does not match with number of nodes")
+        if output_labels is not None and layers[-1] != len(output_labels):
+            raise ValueError("Labels length for output layer does not match with number of nodes")
+        self._inputs = input_labels
+        self._outputs = output_labels
         self._surface = Surface((NNGraph.WIDTH, NNGraph.HEIGHT), pygame.SRCALPHA)
         self._layers = layers
         self._y_mid = NNGraph.HEIGHT / 2
@@ -32,6 +42,7 @@ class NNGraph:
         self._x_centers = self._x_indices()
         self._y_centers = self._y_indices()
         self._points = self._set_points()
+        self._font = pygame.font.Font(rc.files(rsc).joinpath('fonts').joinpath("pixel_font.ttf").open('br'), 16)
 
     @property
     def surface(self):
@@ -95,30 +106,57 @@ class NNGraph:
         """
         for i in range(len(activations)):
             points = self._points[i + 1]
+            max_out = max(activations[i])
             for j in range(len(activations[i])):
-                if activations[i][j] > 0.5:
+                if activations[i][j] > max_out * 0.5:
                     line = NNGraph.BLUE_LINE_STR
                     current = points[j]
                     for node in self._points[i]:
                         pygame.draw.line(self._surface, line, node, current, 1)
 
-    def _draw_nodes(self):
+    def _draw_nodes(self, input_values: list[float]):
         """
         Creates and static image with all the nodes
         :return surface: image that contains all the nodes rendering
         """
-        for nodes in self._points.values():
-            for node in nodes:
-                pygame.draw.circle(self._surface, NNGraph.BLUE_BASE, node, 8)
-                pygame.draw.circle(self._surface, NNGraph.BLACK, node, 7.5)
+        font = pygame.font.Font(None, 16)
+        layers = list(self._points.values())
+        for i in range(len(layers)):
+            nodes = layers[i]
+            for j in range(len(nodes)):
+                pygame.draw.circle(self._surface, NNGraph.BLUE_BASE, nodes[j], 8)
+                pygame.draw.circle(self._surface, NNGraph.BLACK, nodes[j], 7.5)
+                # Render input labels
+                if i == 0 and self._inputs is not None:
+                    text = f"{self._inputs[j]}  :  "
+                    number = f"{input_values[j]:.2f}"
+                    text_lb = font.render(text, True, NNGraph.WHITE)
+                    num_lb = font.render(number, True, NNGraph.WHITE)
+                    num_lb_rect = text_lb.get_rect(centery=nodes[j][1], left=nodes[j][0] - 35)
+                    text_lb_rect = text_lb.get_rect(centery=nodes[j][1], right=num_lb_rect.left - 3)
+                    self._surface.blit(text_lb, text_lb_rect)
+                    self._surface.blit(num_lb, num_lb_rect)
+                # Render output labels
+                if i == len(layers) - 1:
+                    text = f"{self._outputs[j]}"
+                    label = font.render(text, True, NNGraph.WHITE)
+                    lb_rect = label.get_rect(centery=nodes[j][1], left=nodes[j][0] + 15)
+                    self._surface.blit(label, lb_rect)
 
-    def draw_nn(self, activations: dict[int, list[float]]) -> Surface:
+    def draw_nn(self, input_values: list[float], activations: dict[int, list[float]] = None) -> Surface:
         """
         Combines all the nodes and connection to produce a final image of the current state of the NN
         :param activations: output of each layer after forward propagation
+        :param input_values: the actual values that are being provided to the NN in that iteration
         :return surface: rendering of the NN
         """
-        self._surface = Surface((NNGraph.WIDTH, NNGraph.HEIGHT), pygame.SRCALPHA)
-        self._draw_lines(activations)
-        self._draw_nodes()
+        if max(self._layers) > 40 or len(self._layers) > 8:
+            label = self._font.render("The Neural Network it is too wide to be represented",
+                                      True, NNGraph.WHITE)
+            lb_rect = label.get_rect(center=(NNGraph.WIDTH / 2, NNGraph.HEIGHT / 2))
+            self._surface.blit(label, lb_rect)
+        else:
+            self._surface = Surface((NNGraph.WIDTH, NNGraph.HEIGHT), pygame.SRCALPHA)
+            self._draw_lines(activations)
+            self._draw_nodes(input_values)
         return self._surface
