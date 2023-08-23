@@ -8,11 +8,11 @@ from abc import ABC, abstractmethod
 import customtkinter as ctk
 
 
-class ButtonABC(ABC,ctk.CTkButton):
+class ButtonABC(ABC, ctk.CTkButton):
     """
     Buttons base class extend the CTKButton class
     """
-    def __init__(self, variable: ctk.Variable = None, mediator = None, top_level = None, **kwargs):
+    def __init__(self, variable: ctk.Variable = None, mediator=None, top_level=None, **kwargs):
         """
         Constructor
         :param variable: value holder if any
