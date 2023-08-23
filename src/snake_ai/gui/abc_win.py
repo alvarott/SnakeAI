@@ -11,11 +11,12 @@ import customtkinter as ctk
 from typing import Any
 from abc import ABC
 
+
 class WindowABC(ABC):
     """
     Window base class
     """
-    def __init__(self, size: tuple[int,int], resizeable: bool, mediator, title: str = 'SnakeAI',
+    def __init__(self, size: tuple[int, int], resizeable: bool, mediator, title: str = 'SnakeAI',
                  top_level: ctk.CTk = None, theme: str = 'dark'):
         """
         Constructor
@@ -53,7 +54,7 @@ class WindowABC(ABC):
         """
         screen_width = self._window.winfo_screenwidth()
         screen_height = self._window.winfo_screenheight()
-        center = (screen_width // 2 , screen_height // 2)
+        center = (screen_width // 2, screen_height // 2)
         x_position = center[0] - (self._width // 2)
         y_position = center[1] - (self._height // 2)
         self._window.geometry(f'{self._width}x{self._height}+{x_position}+{y_position}')
@@ -79,7 +80,6 @@ class WindowABC(ABC):
         :return:
         """
         self._mediator.exit()
-
 
     class _NextWinButton(ButtonABC):
         """
