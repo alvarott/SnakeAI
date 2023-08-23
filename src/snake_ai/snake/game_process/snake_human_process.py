@@ -9,6 +9,5 @@ from snake_ai.snake.game_process.snake_gui_process import SnakeGUIProcess
 
 
 class SnakeHuman(SnakeGUIProcess):
-    def __init__(self, size: tuple[int, int], core: str, dist_calculator: str, show_path: bool):
-        super().__init__(size=size, core=core, dist_calculator=dist_calculator, mode='human', show_path=show_path,
-                         controller=HumanController())
+    def __init__(self, size: tuple[int, int], core: str, show_path: bool):
+        super().__init__(size=size, core=core, mode='human', show_path=show_path, controller=HumanController())
