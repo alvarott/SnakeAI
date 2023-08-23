@@ -8,7 +8,7 @@
 from snake_ai.mediator import APPMediator
 from snake_ai.snake import resources as rsc
 from importlib import resources as rc
-from data import Folders
+from .data import Folders
 import multiprocessing
 import shutil
 import os
@@ -48,7 +48,7 @@ class Main:
         mediator = APPMediator()
         mediator.start()
 
-
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
-    Main.init()
+# @TODO Uncomment the following lines for pyinstaller
+#if __name__ == '__main__':
+#    multiprocessing.freeze_support()
+#    Main.init()
