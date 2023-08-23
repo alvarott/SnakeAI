@@ -18,21 +18,24 @@ class StartWindow(WindowABC):
     """
     Implements the app starting window
     """
+
     def __init__(self, mediator):
-        super().__init__(size=(400,400), resizeable=False, mediator=mediator)
+        super().__init__(size=(400, 400), resizeable=False, mediator=mediator)
         self._background = self._set_background()
         self._bg_label = tk.Label(master=self._window, image=self._background)
         self._buttons_font = ctk.CTkFont(family="Console", size=16, weight="bold")
-        self._exit_button = self._ExitButton(master=self._window, font=self._buttons_font, text='Exit', text_color='white',
-                                             width=100, height=20, bg_color='#1266db', corner_radius=0,
+        self._exit_button = self._ExitButton(master=self._window, font=self._buttons_font, text='Exit',
+                                             text_color='white',
+                                             width=100, height=20, bg_color='#008be5', corner_radius=20,
                                              border_color='white', border_width=2)
         self._start_button = self._NextWinButton(master=self._window, font=self._buttons_font, text='Start',
-                                               text_color='white', width=100, height=20, bg_color='#1266db',
-                                               corner_radius=0, border_color='white', border_width=2, mediator=mediator,
-                                               top_level=self, command=self._mediator.main_menu)
+                                                 text_color='white', width=100, height=20, bg_color='#008be5',
+                                                 corner_radius=20, border_color='white', border_width=2,
+                                                 mediator=mediator,
+                                                 top_level=self, command=self._mediator.main_menu)
         self._bg_label.place(x=0, y=0, relwidth=1, relheight=1)
-        self._exit_button.place(x=220, y=310)
-        self._start_button.place(x=80, y=310)
+        self._start_button.place(x=140, y=290)
+        self._exit_button.place(x=140, y=330)
 
     def _set_background(self) -> ImageTk:
         """
@@ -51,5 +54,3 @@ class StartWindow(WindowABC):
         def _click_event(self):
             self.winfo_toplevel().destroy()
             quit()
-
-
