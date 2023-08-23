@@ -27,6 +27,7 @@ class GameDisplayerABC(ABC):
         self._running = False
         self._ended = False
         self._fonts = {}
+        self._fonts_s = {}
         self._images = {}
 
     def init_pygame(self, screen_dim: tuple[int, int]) -> None:
@@ -47,12 +48,15 @@ class GameDisplayerABC(ABC):
         """
         # Load fonts
         source = rc.files(rsc).joinpath('fonts')
-        with os.scandir(source) as files:
+        with os.scandir(str(source))as files:
             for file in files:
-                self._fonts[file.name[0:file.name.index('.')]] = pygame.font.Font(source.joinpath(file.name).open('br'), 25)
+                self._fonts[file.name[0:file.name.index('.')]] = pygame.font.Font(source.joinpath(file.name)
+                                                                                  .open('br'), 25)
+                self._fonts_s[file.name[0:file.name.index('.')]] = pygame.font.Font(source.joinpath(file.name)
+                                                                                    .open('br'), 13)
         # Load Images
         source = rc.files(rsc).joinpath(f'images/shared')
-        with os.scandir(source) as files:
+        with os.scandir(str(source)) as files:
             for file in files:
                 self._images[file.name[0:file.name.index('.')]] = pygame.image.load(
                     source.joinpath(file.name).open('br')).convert_alpha()

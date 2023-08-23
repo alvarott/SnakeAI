@@ -7,7 +7,7 @@
 from snake_ai.snake.game_process.snake_human_process import SnakeHuman
 from snake_ai.snake.game_process.snake_ai_gui_process import SnakeAIGUI
 from snake_ai.snake.game_displayer.game_displayer_abc import GameDisplayerABC
-from snake_ai.IO import IO
+from snake_ai.neural.nn import NN
 import pygame
 
 
@@ -21,37 +21,38 @@ class GameVSAIDisplayer(GameDisplayerABC):
     """
     API for displayer classes
     """
-    def __init__(self, size: tuple[int, int], speed: int, dist_calculator: str, show_path: bool,
-                 graphics: str, brain_path: str):
+    def __init__(self, size: tuple[int, int], speed: int, show_path: bool, graphics: str, brain: NN, vision: str):
         """
         Constructor
         :param size: grid game size
         :param speed: integer that controls pygame clock
-        :param dist_calculator:
         :param show_path: boolean flag to control A* rendering
         :param graphics: selected graphics
-        :param brain_path: path to the snake brain
+        :param brain: instance of the NN that controls the game
+        :param vision: defines the data type of that is going to feed NN supported options[binary, real]
+        @TODO improve the menu interaction
         """
         super().__init__(show_path)
         super().init_pygame(((size[0] * BLOCK_SIZE) * 2 + X_EXTRA_BLOCKS, size[1] * BLOCK_SIZE + Y_EXTRA_BLOCKS))
         pygame.display.set_caption('Player vs AI')
         self._size = size
         self._speed = speed
-        self._dist = dist_calculator
         self._graphics = graphics
-        self._model = IO.load(brain_path)
-        self._player = SnakeHuman(size=(size[0], size[1]), core=graphics,
-                                  dist_calculator=dist_calculator, show_path=show_path)
-        self._ai = SnakeAIGUI(size=(size[0], size[1]), core=graphics,
-                              dist_calculator=dist_calculator, show_path=show_path, brain=self._model)
+        self._model = brain
+        self._vision = vision
+        self._player = SnakeHuman(size=(size[0], size[1]), core=graphics, show_path=show_path)
+        self._ai = SnakeAIGUI(size=(size[0], size[1]), core=graphics, show_path=show_path,
+                              brain=brain, vision=vision, mode='autoP')
         self._load_resources()
         self._player_str = self._fonts['pixel_font'].render(f"Player", True, FONT_COLOR)
         self._player_str_rect = self._player_str.get_rect(bottomleft=(BLOCK_SIZE * 2, BLOCK_SIZE))
         self._ai_str = self._fonts['pixel_font'].render(f"AI", True, FONT_COLOR)
-        self._ai_str_rect = self._ai_str.get_rect(bottomleft=(3 * BLOCK_SIZE + self._ai.surface.get_width(), BLOCK_SIZE))
+        self._ai_str_rect = self._ai_str.get_rect(bottomleft=(3 * BLOCK_SIZE + self._ai.surface.get_width(),
+                                                              BLOCK_SIZE))
         self._ai_anchor = (2 * BLOCK_SIZE + self._ai.surface.get_width(), BLOCK_SIZE)
         self._player_anchor = (BLOCK_SIZE, BLOCK_SIZE)
-        self._background = pygame.transform.scale(self._images['background'], (self._game_width, self._game_height))
+        self._background = pygame.transform.scale(self._images['background'],
+                                                  (self._game_width, self._game_height))
 
     def _init_surface(self) -> None:
         """
@@ -112,10 +113,9 @@ class GameVSAIDisplayer(GameDisplayerABC):
         Resets the state of the game
         :return:
         """
-        self._ai = SnakeAIGUI(size=self._size, core=self._graphics, dist_calculator=self._dist,
-                              show_path=self._a_star, brain=self._model)
-        self._player = SnakeHuman(size=self._size, core=self._graphics, dist_calculator=self._dist,
-                                  show_path=self._a_star)
+        self._ai = SnakeAIGUI(size=self._size, core=self._graphics, show_path=self._a_star, brain=self._model,
+                              vision=self._vision, mode='autoP')
+        self._player = SnakeHuman(size=self._size, core=self._graphics, show_path=self._a_star)
 
     def run(self):
         """
