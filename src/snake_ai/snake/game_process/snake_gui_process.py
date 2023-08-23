@@ -17,22 +17,20 @@ class SnakeGUIProcess(SnakeProcess, ABC):
     It relies on the use of the pygame library
     """
 
-    def __init__(self, size: tuple[int, int], core: str, dist_calculator: str, mode: str, show_path: bool,
-                 controller: GameController):
+    def __init__(self, size: tuple[int, int], core: str, mode: str, show_path: bool, controller: GameController,
+                 vision: str = 'binary'):
         """
         Constructor
         :param size: game grid size
         :param core: name of one of the SnakeGUI like implementations
-        :param dist_calculator: name of the distance calculator class implementation
         :param mode: flag to indicate if the game is played by an AI or a human
         :param show_path: flag to indicate if the minimum shortest path must be rendered while playing
         :param controller: object instance of a controller implementation
         """
         self._gui_factory = SnakeGUIFactory()
         super().__init__(size=size,
-                         core=self._gui_factory.get_instance(core_name=core, game_size=size,
-                                                             dist_calculator=dist_calculator, mode=mode,
-                                                             show_path=show_path),
+                         core=self._gui_factory.get_instance(core_name=core, game_size=size, mode=mode,
+                                                             show_path=show_path, vision=vision),
                          controller=controller)
 
     @property
