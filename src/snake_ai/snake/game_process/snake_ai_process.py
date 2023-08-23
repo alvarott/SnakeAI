@@ -5,26 +5,24 @@
 # Date: 21/05/2023
 # Version: 0.0.1
 
+from snake_ai.snake.game_process.snake_abc_process import SnakeProcess
 from snake_ai.snake.snake_core.snake_core import SnakeCore
 from snake_ai.snake.snake_controller import AIController
-from snake_ai.snake.game_process.snake_abc_process import SnakeProcess
-from snake_ai.snake.game_process.snake_ai_abc_process import SnakeAIABC
 
 
-class SnakeAI(SnakeProcess, SnakeAIABC):
+class SnakeAI(SnakeProcess):
     """
     Implements the entire game execution in a lightweight manner to optimize the NN training
     """
     # Object instances counter
     obj_counter = 1
 
-    def __init__(self, size: tuple[int, int], dist_calculator: str, input: int, output: int, hidden: list[int],
-                 output_init: str, bias: bool, bias_init: str, hidden_init: str, output_act: str, hidden_act: str
-                 ):
+    def __init__(self, size: tuple[int, int], input: int, output: int, hidden: list[int], vision: str,
+                 output_init: str, bias: bool, hidden_init: str, output_act: str, hidden_act: str,
+                 bias_init: str = 'zero'):
         """
         Constructor
         :param size: game grid size
-        :param dist_calculator: Distance calculator name
         :param input: input nodes to the NN
         :param output: output nodes from the NN
         :param hidden: list with the number of nodes of each hidden layer
@@ -35,14 +33,29 @@ class SnakeAI(SnakeProcess, SnakeAIABC):
         :param output_act: output layer activation function
         :param hidden_act: hidden layers activation function
         """
-        controller = AIController(input=input, output=output, hidden=hidden, output_init=output_init, bias=bias,
-                                  bias_init=bias_init, hidden_init=hidden_init, output_act=output_act,
-                                  hidden_act=hidden_act)
-        SnakeProcess.__init__(self, size=size, core=SnakeCore(size=size, dist_calculator=dist_calculator, mode='auto'),
-                              controller=controller)
-        SnakeAIABC.__init__(self, controller)
+        self._controller = AIController(input=input, output=output, hidden=hidden, output_init=output_init, bias=bias,
+                                        bias_init=bias_init, hidden_init=hidden_init, output_act=output_act,
+                                        hidden_act=hidden_act)
+        SnakeProcess.__init__(self, size=size, core=SnakeCore(size=size, mode='autoT', vision=vision),
+                              controller=self._controller)
         self._id = SnakeAI.obj_counter
         SnakeAI.obj_counter += 1
+
+    @classmethod
+    def reset_obj_counter(cls):
+        SnakeAI.obj_counter = 1
+
+    @property
+    def vision(self):
+        return self._core.vision_type
+
+    @property
+    def controller(self) -> AIController:
+        """
+        Game controller instance
+        :return:
+        """
+        return self._controller
 
     @property
     def id(self) -> int:
