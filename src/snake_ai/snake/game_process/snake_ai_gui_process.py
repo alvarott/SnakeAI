@@ -7,28 +7,32 @@
 
 from snake_ai.snake.snake_controller import AIController
 from snake_ai.snake.game_process.snake_gui_process import SnakeGUIProcess
-from snake_ai.snake.game_process.snake_ai_abc_process import SnakeAIABC
 from snake_ai.neural.nn import NN
 
 
-class SnakeAIGUI(SnakeGUIProcess, SnakeAIABC):
+class SnakeAIGUI(SnakeGUIProcess):
     """
     Implements a graphical snake process controlled by a NN
     """
-    def __init__(self, size: tuple[int, int], core: str, dist_calculator: str, show_path: bool, brain: NN):
+    def __init__(self, size: tuple[int, int], core: str, show_path: bool, brain: NN, vision: str, mode: str):
         """
         Constructor
         :param size: game grid size
         :param core: SnakeGUI name to be used as core
-        :param dist_calculator: Distance calculator name
         :param show_path: rendering min path flag
         :param brain: NN that controls the snake
         """
-        controller = AIController(input=1, output=1, hidden=[1], output_init='he', bias=False,
-                                  bias_init='he', hidden_init='he', output_act='relu',
-                                  hidden_act='relu')
-        controller.brain = brain
-        SnakeGUIProcess.__init__(self, size=size, core=core, dist_calculator=dist_calculator, mode='auto',
-                                 show_path=show_path,
-                                 controller=controller)
-        SnakeAIABC.__init__(self, controller)
+        self._controller = AIController(input=1, output=1, hidden=[1], output_init='he', bias=False,
+                                        bias_init='he', hidden_init='he', output_act='relu',
+                                        hidden_act='relu')
+        self._controller.brain = brain
+        SnakeGUIProcess.__init__(self, size=size, core=core, mode=mode, show_path=show_path, vision=vision,
+                                 controller=self._controller)
+
+    @property
+    def controller(self) -> AIController:
+        """
+        Game controller instance
+        :return:
+        """
+        return self._controller
