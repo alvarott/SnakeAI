@@ -19,7 +19,7 @@ class NN:
     B_NAME = 'bias_'
 
     def __init__(self, input: int, output: int, hidden: list[int], output_init: str, bias: bool,
-                 bias_init: str, hidden_init: str, output_act: str, hidden_act: str):
+                 hidden_init: str, output_act: str, hidden_act: str, bias_init: str = 'zero'):
         """
         Constructor
         :param input: input nodes to the NN
