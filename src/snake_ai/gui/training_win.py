@@ -456,7 +456,7 @@ class TrainingWindow(WindowABC):
         else:
             progress = (self._best_score / self._limit_score) * 50
         self._max_progress = self._max_progress if self._max_progress > progress else progress
-        self._pgrbar.set(self._max_progress)
+        self._pgrbar.set(self._max_progress / 100)
 
     def _init_training_instances(self) -> None:
         """

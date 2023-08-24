@@ -457,4 +457,4 @@ class ProgressBar(ctk.CTkProgressBar):
     # override function to update the progress text whenever new value is set
     def set(self, val, **kwargs):
         super().set(val, **kwargs)
-        self._canvas.itemconfigure("progress_text", text=f'Progress: {val:.2f} %')
+        self._canvas.itemconfigure("progress_text", text=f'Progress: {val * 100:.2f} %')
