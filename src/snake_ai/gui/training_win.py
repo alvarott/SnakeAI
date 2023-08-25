@@ -13,6 +13,7 @@ from snake_ai.gui.abc_win import WindowABC
 from matplotlib.figure import Figure
 from snake_ai.data import Folders
 import matplotlib.pyplot as plt
+from tkinter import messagebox
 from datetime import timedelta
 from threading import Thread
 import customtkinter as ctk
@@ -61,11 +62,11 @@ class TrainingWindow(WindowABC):
         self._turns_plot = self._turns_fig.add_subplot()
         self._fitness_plot = self._fitness_fig.add_subplot()
         # Plot labels
-        self._moves_plot.set_title('Average Moves / Generation')
-        self._score_plot.set_title('Individual Score / Generation')
-        self._efficiency_plot.set_title('Average Efficiency / Generation')
-        self._turns_plot.set_title('Average Turns / Generation')
-        self._fitness_plot.set_title('Average Fitness / Generation')
+        self._moves_plot.set_title('Average Moves')
+        self._score_plot.set_title('Individual Score')
+        self._efficiency_plot.set_title('Average Efficiency')
+        self._turns_plot.set_title('Average Turns')
+        self._fitness_plot.set_title('Average Fitness')
 
         # Plot Data
         self._avg_fitness = []
@@ -176,7 +177,7 @@ class TrainingWindow(WindowABC):
 
         # Progress labels
         self._pgr_state = ctk.CTkLabel(master=self._prg_frame,
-                                       text='Status: not initialized,     Elapsed Time: 00:00:00',
+                                       text='Status: not initialized,     Elapsed Time: 00:00:00.000',
                                        font=self._font13b)
         self._pgr_best = ctk.CTkLabel(master=self._prg_frame, text=f'ATB Sc: 0,    CB Sc: 0, '
                                                                    f'    ATB Fit: 0.00M,    CB Fit: 0.00M',
@@ -341,11 +342,11 @@ class TrainingWindow(WindowABC):
         self._fitness_plot.plot(x, self._avg_fitness)
 
         # Titles
-        self._moves_plot.set_title('Average Moves / Generation')
-        self._score_plot.set_title('Average Score / Generation')
-        self._efficiency_plot.set_title('Average Efficiency / Generation')
-        self._turns_plot.set_title('Average Turns / Generation')
-        self._fitness_plot.set_title('Average Fitness / Generation')
+        self._moves_plot.set_title('Average Moves')
+        self._score_plot.set_title('Average Score')
+        self._efficiency_plot.set_title('Average Efficiency')
+        self._turns_plot.set_title('Average Turns')
+        self._fitness_plot.set_title('Average Fitness')
 
         # Draw plots
         self._moves_canvas.draw()
@@ -354,6 +355,16 @@ class TrainingWindow(WindowABC):
         self._turns_canvas.draw()
         self._fitness_canvas.draw()
 
+    def _closing_button_event(self):
+        """
+        :return:
+        """
+        if self._displaying.get() or self._running.get():
+            messagebox.showerror(title='Processes Running', message='Please stop all running processes before closing',
+                                 parent=self.window)
+        else:
+            super()._closing_button_event()
+
     def _elapsed_time(self) -> str:
         """
         Calculates the elapsed time
@@ -361,7 +372,19 @@ class TrainingWindow(WindowABC):
         """
         seconds = time() - self._start_time
         self._accumulated_time += seconds
-        return str(timedelta(seconds=self._accumulated_time))[:11]
+        return self._elapsed_time_str()
+
+    def _elapsed_time_str(self) -> str:
+        """
+        Converts a number of seconds to a human-readable format
+        :return: human-readable time
+        """
+        if self._accumulated_time > 0:
+            elapse_time = str(timedelta(seconds=self._accumulated_time))
+            elapse_time = elapse_time[:elapse_time.index('.') + 3]
+        else:
+            elapse_time = '0:00:00.00'
+        return elapse_time
 
     def _set_displaying(self, *args) -> None:
         """
@@ -382,7 +405,7 @@ class TrainingWindow(WindowABC):
         """
         if not self._started:
             self._pgr_state.configure(text=f'Status: Stopped,     '
-                                           f'Elapsed Time: {str(timedelta(seconds=self._accumulated_time))[:11]}')
+                                           f'Elapsed Time: {self._elapsed_time_str()}')
             self._start_stop_button.configure(text='Start', state='normal')
             self._kill_button.configure(state='normal')
 
@@ -390,7 +413,10 @@ class TrainingWindow(WindowABC):
         """
         Defines the terminate button behavior
         """
-        if self._iterations.get() == 0:
+        if self._displaying.get():
+            messagebox.showerror(title='Processes Running', message='Pleased stop all running processes before closing',
+                                 parent=self.window)
+        elif self._iterations.get() == 0:
             self._mediator.back_to_training_config(self.window, False)
         else:
             self._mediator.back_to_training_config(self.window, True)
@@ -427,7 +453,7 @@ class TrainingWindow(WindowABC):
         elif self._started:
             self._start_stop_button.configure(state='disabled')
             self._pgr_state.configure(text=f'Status: Ending,     '
-                                           f'Elapsed Time: {str(timedelta(seconds=self._accumulated_time))[:11]}')
+                                           f'Elapsed Time: {self._elapsed_time_str()}')
             self._started = False
         else:
             self._kill_button.configure(state='disabled')
@@ -467,7 +493,7 @@ class TrainingWindow(WindowABC):
         self._start_stop_button.configure(state='disabled')
         self._start_time = time()
         self._pgr_state.configure(text=f'Status: Initializing,     '
-                                       f'Elapsed Time: {str(timedelta(seconds=self._accumulated_time))[:11]}')
+                                       f'Elapsed Time: {self._elapsed_time_str()}')
         self._pgr_state.update()
         # Create population
         self._batch = SnakeBatch(individuals=self._config['population'],
@@ -547,7 +573,6 @@ class TrainingWindow(WindowABC):
                 IO.save(Folders.populations_folder, self._config['model'] + '.pop', self._batch.population)
             else:
                 self._running.set(False)
-
         # Update UI status
         self._pgr_state.configure(text=f'Status: Running,     '
                                        f'Elapsed Time: {self._elapsed_time()}')
