@@ -418,12 +418,12 @@ class TrainingConfigWindow(WindowABC):
             self._replacement_lb = ctk.CTkLabel(master=self, text="  Replacement", font=self._font)
             self._offspring_lb = ctk.CTkLabel(master=self, text="     Offspring", font=self._font)
             # Widgets
-            self._population_w = NumericEntry(master=self, from_=2, to=2000, step=10, type='int',
+            self._population_w = NumericEntry(master=self, from_=1, to=2000, step=10, type='int',
                                               label=self._population_lb)
             self._selection_w = DropDownPanel(master=self, options=self._genetic_data.selection,
                                               command=self._select_behavior,
                                               mouse_wheel_func=self._select_behavior)
-            self._tournament_w = NumericEntry(master=self, from_=2, to=self._population_w.value, step=10, type='int',
+            self._tournament_w = NumericEntry(master=self, from_=1, to=500, step=10, type='int',
                                               label=self._tournament_lb)
             self._crossover_w = DropDownPanel(master=self, options=list(self._genetic_data.crossover.keys()),
                                               command=self._crossover_behavior,
@@ -442,7 +442,7 @@ class TrainingConfigWindow(WindowABC):
             self._replacement_w = DropDownPanel(master=self, options=self._genetic_data.replacement,
                                                 command=self._replacement_behavior,
                                                 mouse_wheel_func=self._replacement_behavior)
-            self._offspring_w = NumericEntry(master=self, from_=1, to=self._population_w.value, step=10, type='int',
+            self._offspring_w = NumericEntry(master=self, from_=1, to=500, step=10, type='int',
                                              label=self._offspring_lb)
 
             # Entries
@@ -492,9 +492,21 @@ class TrainingConfigWindow(WindowABC):
             self._crossover_behavior()
             self._mutation_behavior()
             self._replacement_behavior()
-            self._population_w.bind('<MouseWheel>', self._population_behavior)
-            vcmd = (self.register(self._population_behavior), '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
-            self._population_w.configure(validate='key', validatecommand=vcmd)
+            self._population_w.bind('<Leave>', self._leave_event)
+            self._tournament_w.bind('<Leave>', self._leave_event)
+
+        def _leave_event(self, event) -> None:
+            """
+            Set the entries to a valid minimum value
+            :param event:  leave mouse event
+            :return:
+            """
+            if self._population_w.value < 2:
+                self._population_w.set('2')
+            if self._tournament_w.value < 2:
+                self._tournament_w.set('2')
+            self._offspring_w.set_to(self._population_w.value)
+            self._tournament_w.set_to(self._population_w.value)
 
         def _set_layout(self) -> None:
             self.grid_propagate(False)
@@ -560,21 +572,3 @@ class TrainingConfigWindow(WindowABC):
                 self._flip_widgets([self._offspring_lb, self._offspring_w], True)
             else:
                 self._flip_widgets([self._offspring_lb, self._offspring_w], False)
-
-        def _population_behavior(self, *args, **kwargs) -> bool:
-            """
-            Limits the offspring and tournament entries according to the population
-            :param args:
-            :param kwargs:
-            :return:
-            """
-            try:
-                if len(args) > 1:
-                    population = int(args[2])
-                else:
-                    population = int(self._population_w.get())
-                self._offspring_w.set_to(population)
-                self._tournament_w.set_to(population)
-                return True
-            except:
-                return True
