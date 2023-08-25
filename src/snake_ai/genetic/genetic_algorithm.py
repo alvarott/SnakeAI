@@ -48,8 +48,10 @@ class GA:
         population_fitness = self._fitness(scores)
         # Select parents and form couples
         if self._offspring % 2 != 0:
-            self._offspring -= 1
-        parents = self._selection(num_parents=self._offspring, population_fitness=population_fitness,
+            offspring = self._offspring + 1
+        else:
+            offspring = self._offspring
+        parents = self._selection(num_parents=offspring, population_fitness=population_fitness,
                                   **self._selection_params)
         couples = GA.coupling(parents)
         parents = {key: population[key] for key in parents}
