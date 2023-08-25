@@ -112,6 +112,7 @@ class APPMediator:
         if isinstance(model, tuple):
             game = GameModelDisplayer(size=(game_size[0], game_size[1]), speed=game_speed, show_path=show_path,
                                       graphics=graphics, brain=model[1], vision=model[0])
+            game.force_init()
             game.run()
 
     def main_to_try_model(self) -> None:

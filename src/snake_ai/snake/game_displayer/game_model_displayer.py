@@ -71,6 +71,14 @@ class GameModelDisplayer(GameDisplayerABC):
         self._load_resources()
         self._background = pygame.transform.scale(self._images['background'], (self._game_width, self._game_height))
 
+    def force_init(self):
+        """
+        Skips the initial dialog window
+        :return:
+        """
+        self._initializing = False
+        self._running = True
+
     def _init_surface(self) -> None:
         """
         Creates the initial surface
@@ -148,8 +156,9 @@ class GameModelDisplayer(GameDisplayerABC):
         :return:
         """
         clock = pygame.time.Clock()
-        self._init_surface()
-        pygame.display.flip()
+        if self._initializing and not self._running:
+            self._init_surface()
+            pygame.display.flip()
         while self._alive:
             events = pygame.event.get()
             for event in events:
@@ -184,6 +193,7 @@ class GameModelDisplayer(GameDisplayerABC):
                 else:
                     self._stats_board(True)
                     self._reset()
+        # Save statistics
         if len(self._scores) > 0 and self._name is not None:
             IO.save(Folders.statistics_folder, self._name,
                     {'scores': self._scores, 'efficiencies': self._efficiency})
