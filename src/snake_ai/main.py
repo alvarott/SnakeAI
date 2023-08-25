@@ -8,7 +8,7 @@
 from snake_ai.mediator import APPMediator
 from snake_ai.snake import resources as rsc
 from importlib import resources as rc
-from .data import Folders
+from data import Folders
 import multiprocessing
 import shutil
 import os
