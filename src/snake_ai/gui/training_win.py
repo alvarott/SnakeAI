@@ -147,10 +147,11 @@ class TrainingWindow(WindowABC):
                                                   text=f': {self._short.names_map[configuration["selection"]]}',
                                                   font=self._font)
         self._conf_cross = ctk.CTkLabel(master=self._ga_frame, text=' XO', font=self._font_bold)
+        xo_param = ('' if self._short.params_map[configuration["crossover"]] == '' else
+                    f'({self._short.params_map[configuration["crossover"]]}='
+                    f'{configuration["crossover_param"][0]})')
         self._conf_cross_value = ctk.CTkLabel(master=self._ga_frame,
-                                              text=f': {self._short.names_map[configuration["crossover"]]}'
-                                                   f'({self._short.params_map[configuration["crossover"]]}='
-                                                   f'{configuration["crossover_param"][0]})',
+                                              text=f': {self._short.names_map[configuration["crossover"]]}{xo_param}',
                                               font=self._font)
         self._conf_cross_rate = ctk.CTkLabel(master=self._ga_frame, text=' XO Rate', font=self._font_bold)
         self._conf_cross_rate_value = ctk.CTkLabel(master=self._ga_frame,

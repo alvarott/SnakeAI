@@ -105,7 +105,7 @@ class GAShortNames:
     def __init__(self):
         self.names_map = {'roulette_wheel': 'RW', 'stochastic': 'stochastic', 'tournament': 'tournament',
                           'whole_arithmetic': 'WA', 'sp_arithmetic': 'SPA', 'sbx': 'SBX',
-                          'uniform': 'U', 'gaussian': 'gauss', 'fitness_based': 'fitness_based',
+                          'uniform': 'uniform', 'gaussian': 'gauss', 'fitness_based': 'fitness_based',
                           'generational': 'generational'}
         self.params_map = {'whole_arithmetic': '\u03B1', 'sp_arithmetic': '\u03B1', 'sbx': '\u03B7',
                            'uniform': '', 'gaussian': '\u03C3'}
