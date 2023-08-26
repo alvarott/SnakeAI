@@ -21,8 +21,8 @@ class NNGraph:
     BLUE_LINE_WEAK = (56, 67, 69)
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    WIDTH = 960
-    HEIGHT = 1080
+    WIDTH = 795
+    HEIGHT = 810
 
     def __init__(self, layers: list[int], input_labels: list[str] = None, output_labels: list[str] = None):
         """
@@ -42,7 +42,7 @@ class NNGraph:
         self._x_centers = self._x_indices()
         self._y_centers = self._y_indices()
         self._points = self._set_points()
-        self._font = pygame.font.Font(rc.files(rsc).joinpath('fonts').joinpath("pixel_font.ttf").open('br'), 16)
+        self._font = pygame.font.Font(rc.files(rsc).joinpath('fonts').joinpath("pixel_font.ttf").open('br'), 18)
 
     @property
     def surface(self):
@@ -69,10 +69,10 @@ class NNGraph:
         Sets the axes where to place the layers over the 'x' axis
         :return x_centers: list of centers
         """
-        length = NNGraph.WIDTH / (len(self._layers) + 1)
+        length = (NNGraph.WIDTH - 260) / (len(self._layers) - 1)
         x_centers = []
-        for i in range(1, len(self._layers) + 1):
-            x_centers.append(length * i)
+        for i in range(len(self._layers)):
+            x_centers.append(130 + (length * i))
         return x_centers
 
     def _y_indices(self) -> dict[int, list[float]]:
@@ -150,8 +150,8 @@ class NNGraph:
         :param input_values: the actual values that are being provided to the NN in that iteration
         :return surface: rendering of the NN
         """
-        if max(self._layers) > 40 or len(self._layers) > 8:
-            label = self._font.render("The Neural Network it is too wide to be represented",
+        if max(self._layers) > 40 or len(self._layers) > 13:
+            label = self._font.render("The neural network is too wide to be represented",
                                       True, NNGraph.WHITE)
             lb_rect = label.get_rect(center=(NNGraph.WIDTH / 2, NNGraph.HEIGHT / 2))
             self._surface.blit(label, lb_rect)
