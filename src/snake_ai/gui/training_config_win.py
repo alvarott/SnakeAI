@@ -494,6 +494,9 @@ class TrainingConfigWindow(WindowABC):
             self._replacement_behavior()
             self._population_w.bind('<Leave>', self._leave_event)
             self._tournament_w.bind('<Leave>', self._leave_event)
+            self._population_w.bind('<MouseWheel>', self._population_behavior)
+            vcmd = (self.register(self._population_behavior), '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+            self._population_w.configure(validate='key', validatecommand=vcmd)
 
         def _leave_event(self, event) -> None:
             """
@@ -572,3 +575,21 @@ class TrainingConfigWindow(WindowABC):
                 self._flip_widgets([self._offspring_lb, self._offspring_w], True)
             else:
                 self._flip_widgets([self._offspring_lb, self._offspring_w], False)
+
+        def _population_behavior(self, *args, **kwargs) -> bool:
+            """
+            Limits the offspring and tournament entries according to the population
+            :param args:
+            :param kwargs:
+            :return:
+            """
+            try:
+                if len(args) > 1:
+                    population = int(args[2])
+                else:
+                    population = int(self._population_w.get())
+                self._offspring_w.set_to(population)
+                self._tournament_w.set_to(population)
+                return True
+            except:
+                return True
