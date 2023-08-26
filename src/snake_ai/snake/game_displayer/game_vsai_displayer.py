@@ -122,6 +122,15 @@ class GameVSAIDisplayer(GameDisplayerABC):
         Game main loop logic
         :return:
         """
+        def restart() -> None:
+            self._reset()
+            self._screen.fill((0, 0, 0))
+            self._init_surface()
+            self._initializing = True
+            self._running = False
+            self._ended = False
+            pygame.display.flip()
+
         clock = pygame.time.Clock()
         self._init_surface()
         pygame.display.flip()
@@ -146,13 +155,14 @@ class GameVSAIDisplayer(GameDisplayerABC):
                         self._ended = False
                         pygame.quit()
                     elif key == pygame.K_RETURN:
-                        self._reset()
-                        self._screen.fill((0, 0, 0))
-                        self._init_surface()
-                        self._initializing = True
+                        restart()
+                elif event.type == pygame.KEYDOWN and not self._player.running:
+                    key = event.key
+                    if key == pygame.K_ESCAPE:
                         self._running = False
-                        self._ended = False
-                        pygame.display.flip()
+                        self._ended = True
+                    elif key == pygame.K_r:
+                        restart()
             # Main event
             if self._running:
                 # Refresh background
@@ -160,9 +170,23 @@ class GameVSAIDisplayer(GameDisplayerABC):
                 # Player step
                 if self._player.running:
                     self._player.step(current_dir=self._player.core.direction, events=events)
+                else:
+                    game_over = self._fonts['pixel_font'].render(f"GAME OVER!!", True, FONT_COLOR)
+                    retry = self._fonts_m['pixel_font'].render(f"Press Esc-Exit R-Retry", True, FONT_COLOR)
+                    game_over_rec = game_over.get_rect(center=(self._player.surface.get_width() / 2,
+                                                       self._player.surface.get_height() / 2 - 30))
+                    retry_rec = retry.get_rect(center=(self._player.surface.get_width() / 2,
+                                                       self._player.surface.get_height() / 2 + 20))
+                    self._player.surface.blit(game_over, game_over_rec)
+                    self._player.surface.blit(retry, retry_rec)
                 # AI step
                 if self._ai.running:
                     self._ai.step(current_dir=self._ai.core.direction, vision=self._ai.core.vision)
+                else:
+                    ai_over = self._fonts['pixel_font'].render(f"GAME OVER!!", True, FONT_COLOR)
+                    ai_over_rec = ai_over.get_rect(center=(self._ai.surface.get_width() / 2,
+                                                           self._ai.surface.get_height() / 2))
+                    self._ai.surface.blit(ai_over, ai_over_rec)
                 # Render game state
                 pygame.draw.rect(self._player.surface, (0, 0, 0), self._player.surface.get_rect(), 4)
                 pygame.draw.rect(self._ai.surface, (0, 0, 0), self._ai.surface.get_rect(), 4)
