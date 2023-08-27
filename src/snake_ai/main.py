@@ -48,7 +48,6 @@ class Main:
         mediator = APPMediator()
         mediator.start()
 
-# @TODO Uncomment the following lines for pyinstaller
-#if __name__ == '__main__':
-#    multiprocessing.freeze_support()
-#    Main.init()
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    Main.init()
