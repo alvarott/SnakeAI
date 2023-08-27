@@ -68,6 +68,14 @@ set "launcher=%app_root%\launcher.vbs"
 set "config_dir=%app_root%\config"
 set "config_file=%config_dir%\setup_init.bat"
 
+REM Delete previous installations
+if exist "%app_root%" (
+    echo WARNING: Prior installation detected, cleaning up folder
+    rd /s /q "%app_root%"
+    echo INFO: Previous installation deleted
+) else (
+    echo INFO: No previous installation detected
+)
 
 REM Create python environment and install snakeAI package
 echo INFO: Creating Python environment:
