@@ -57,7 +57,7 @@ class GeneticConfig:
         self.crossover: dict[str, str] = {'W Arithmetic': self.alpha, 'SP Arithmetic': self.alpha, 'SBX': self.eta,
                                           'Uniform': ''}
         self.mutation: dict[str, str] = {'Gaussian': self.sigma}
-        self.replacement: list[str] = ['Fitness-Based', 'Generational']
+        self.replacement: list[str] = ['Steady-State', 'Generational']
         self.hyperparams_range: dict[str, tuple[int, int]] = {self.alpha: (0, 1, 0.01),
                                                               self.eta: (0, 500, 1),
                                                               self.sigma: (0, 1, 0.01)}
@@ -94,7 +94,7 @@ class DropDownMapping:
                         'roulette_wheel': 'Roulette Wheel', 'stochastic': 'Stochastic', 'tournament': 'Tournament',
                         'whole_arithmetic': 'W Arithmetic', 'sp_arithmetic': 'SP Arithmetic', 'sbx': 'SBX',
                         'uniform': 'Uniform', 'alpha': '\u03B1', 'eta': '\u03B7', 'gaussian': 'Gaussian',
-                        'sigma': '\u03C3', 'fitness_based': 'Fitness-Based', 'generational': 'Generational',
+                        'sigma': '\u03C3', 'steady_state': 'Steady-State', 'generational': 'Generational',
                         (10, 10): '10x10', (15, 15): '15x15', (20, 20): '20x20', (25, 25): '25x25'}
 
 
@@ -105,7 +105,7 @@ class GAShortNames:
     def __init__(self):
         self.names_map = {'roulette_wheel': 'RW', 'stochastic': 'stochastic', 'tournament': 'tournament',
                           'whole_arithmetic': 'WA', 'sp_arithmetic': 'SPA', 'sbx': 'SBX',
-                          'uniform': 'uniform', 'gaussian': 'gauss', 'fitness_based': 'fitness_based',
+                          'uniform': 'uniform', 'gaussian': 'gauss', 'steady_state': 'steady_state',
                           'generational': 'generational'}
         self.params_map = {'whole_arithmetic': '\u03B1', 'sp_arithmetic': '\u03B1', 'sbx': '\u03B7',
                            'uniform': '', 'gaussian': '\u03C3'}
