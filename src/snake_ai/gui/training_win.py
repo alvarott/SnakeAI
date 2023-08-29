@@ -36,8 +36,8 @@ class TrainingWindow(WindowABC):
         self._colors = Colors()
         self._short = GAShortNames()
         self._ga_map = GeneticConfig()
-        self._start_time = 0
-        self._accumulated_time = 0
+        self._start_time = 0.0
+        self._accumulated_time = 0.0
         # Training Objects
         self._batch: SnakeBatch | None = None
         self._ga: GA | None = None
@@ -415,9 +415,12 @@ class TrainingWindow(WindowABC):
         Converts a number of seconds to a human-readable format
         :return: human-readable time
         """
-        if self._start_time != 0:
+        if self._start_time > 0.0:
             elapse_time = str(timedelta(seconds=seconds))
-            elapse_time = elapse_time[:elapse_time.index('.') + 3]
+            if '.' in elapse_time:
+                elapse_time = elapse_time[:elapse_time.index('.') + 3]
+            else:
+                elapse_time = '0:00:00.00'
         else:
             elapse_time = '0:00:00.00'
         return elapse_time
