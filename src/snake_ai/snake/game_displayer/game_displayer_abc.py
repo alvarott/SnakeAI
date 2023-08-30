@@ -29,6 +29,7 @@ class GameDisplayerABC(ABC):
         self._fonts = {}
         self._fonts_s = {}
         self._fonts_m = {}
+        self._timer_font_path = self._get_timer_font_path()
         self._images = {}
 
     def init_pygame(self, screen_dim: tuple[int, int]) -> None:
@@ -38,6 +39,9 @@ class GameDisplayerABC(ABC):
         :return:
         """
         pygame.init()
+        source = rc.files(rsc).joinpath(f'images/shared/app_icon.png')
+        ico = pygame.image.load(str(source))
+        pygame.display.set_icon(ico)
         self._screen = pygame.display.set_mode(screen_dim)
         self._game_width = screen_dim[0]
         self._game_height = screen_dim[1]
@@ -63,6 +67,10 @@ class GameDisplayerABC(ABC):
             for file in files:
                 self._images[file.name[0:file.name.index('.')]] = pygame.image.load(
                     source.joinpath(file.name).open('br')).convert_alpha()
+
+    def _get_timer_font_path(self):
+        source = rc.files(rsc).joinpath('fonts/pixel_font.ttf')
+        return source
 
     @abstractmethod
     def run(self):

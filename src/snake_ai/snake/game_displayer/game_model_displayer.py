@@ -35,7 +35,7 @@ class GameModelDisplayer(GameDisplayerABC):
     """
 
     def __init__(self, size: tuple[int, int], speed: int, show_path: bool, graphics: str,
-                 brain: NN, vision: str, name: str = None):
+                 brain: NN, vision: str, mediator = None, name: str = None, reload: bool = False):
         """
         Constructor
         :param size: grid game size
@@ -45,6 +45,8 @@ class GameModelDisplayer(GameDisplayerABC):
         :param brain: instance of the NN that controls the game
         :param vision: defines the data type of that is going to feed NN supported options[binary, real]
         :param name: used as flag and name file to produce output statistics
+        :param mediator: app mediator instance
+        :param reload: flag to indicate if the model must be reloaded, used to update the training displayer
         """
         super().__init__(show_path)
         super().init_pygame(SCREEN)
@@ -63,6 +65,9 @@ class GameModelDisplayer(GameDisplayerABC):
         self._input_lb = BINARY_MAP if vision == 'binary' else REAL_MAP
         self._output_lb = ["left", "straight", "right"]
         self._max_score = size[0] * size[1] - 3
+        self._mediator = mediator
+        self._reload = reload
+        self._games = 0
         self._ai = SnakeAIGUI(size=(size[0], size[1]), core=graphics, show_path=show_path, brain=self._model,
                               vision=vision, mode='autoP')
         self._nn_graph = NNGraph(self._ai.controller.layers, self._input_lb, self._output_lb)
@@ -147,8 +152,13 @@ class GameModelDisplayer(GameDisplayerABC):
         Resets the state of the game
         :return:
         """
+        print(self._games)
+        if self._games == 3 and self._reload:
+            self._games = 0
+            self._model = self._mediator.reload_model()
         self._ai = SnakeAIGUI(size=self._size, core=self._graphics, show_path=self._a_star, brain=self._model,
                               vision=self._vision, mode='autoP')
+
 
     def run(self):
         """
@@ -191,9 +201,14 @@ class GameModelDisplayer(GameDisplayerABC):
                     pygame.display.flip()
                     clock.tick(self._speed)
                 else:
+                    if self._reload:
+                        self._games += 1
                     self._stats_board(True)
                     self._reset()
         # Save statistics
         if len(self._scores) > 0 and self._name is not None:
-            IO.save(Folders.statistics_folder, self._name,
-                    {'scores': self._scores, 'efficiencies': self._efficiency})
+            try:
+                IO.save(Folders.statistics_folder, self._name,
+                        {'scores': self._scores, 'efficiencies': self._efficiency})
+            except:
+                pass

@@ -53,6 +53,12 @@ class GameVSAIDisplayer(GameDisplayerABC):
         self._player_anchor = (BLOCK_SIZE, BLOCK_SIZE)
         self._background = pygame.transform.scale(self._images['background'],
                                                   (self._game_width, self._game_height))
+        self._player_init_surface = self._player.surface.copy()
+        self._ai_init_surface = self._ai.surface.copy()
+        self._start_transition = True
+        self._count_down_size = 90
+        self._counts = 3
+        self._count_speed = 24
 
     def _init_surface(self) -> None:
         """
@@ -116,21 +122,31 @@ class GameVSAIDisplayer(GameDisplayerABC):
         self._ai = SnakeAIGUI(size=self._size, core=self._graphics, show_path=self._a_star, brain=self._model,
                               vision=self._vision, mode='autoP')
         self._player = SnakeHuman(size=self._size, core=self._graphics, show_path=self._a_star)
+        self._player_init_surface = self._player.surface.copy()
+        self._ai_init_surface = self._ai.surface.copy()
+
+    def _restart(self) -> None:
+        """
+        Restarts the game
+        :return:
+        """
+        self._reset()
+        self._start_transition = True
+        self._screen.fill((0, 0, 0))
+        self._init_surface()
+        self._initializing = True
+        self._running = False
+        self._ended = False
+        pygame.display.flip()
 
     def run(self):
         """
         Game main loop logic
         :return:
         """
-        def restart() -> None:
-            self._reset()
-            self._screen.fill((0, 0, 0))
-            self._init_surface()
-            self._initializing = True
-            self._running = False
-            self._ended = False
-            pygame.display.flip()
-
+        timer_size = self._count_down_size
+        ticks_left = self._counts
+        speed = self._count_speed
         clock = pygame.time.Clock()
         self._init_surface()
         pygame.display.flip()
@@ -155,38 +171,63 @@ class GameVSAIDisplayer(GameDisplayerABC):
                         self._ended = False
                         pygame.quit()
                     elif key == pygame.K_RETURN:
-                        restart()
+                        speed = self._count_speed
+                        self._restart()
                 elif event.type == pygame.KEYDOWN and not self._player.running:
                     key = event.key
                     if key == pygame.K_ESCAPE:
                         self._running = False
                         self._ended = True
                     elif key == pygame.K_r:
-                        restart()
+                        speed = self._count_speed
+                        self._restart()
             # Main event
             if self._running:
                 # Refresh background
                 self._screen.blit(self._background, (0, 0))
-                # Player step
-                if self._player.running:
-                    self._player.step(current_dir=self._player.core.direction, events=events)
+                # Player init count down
+                if self._start_transition:
+                    if ticks_left ==  0:
+                        self._start_transition = False
+                        speed = self._speed
+                        ticks_left = self._counts
+                    else:
+                        if timer_size > 4:
+                            timer = (pygame.font.Font(self._timer_font_path.open('br'), timer_size)
+                                     .render(f"{ticks_left}", True, FONT_COLOR))
+                            timer_rect_player = timer.get_rect(center=(self._player.surface.get_width() / 2,
+                                                               self._player.surface.get_height() / 2 - 90))
+                            timer_rect_ai = timer.get_rect(center=(self._ai.surface.get_width() / 2,
+                                                                   self._ai.surface.get_height() / 2 - 90))
+                            self._player.surface.blit(self._player_init_surface, (0,0))
+                            self._ai.surface.blit(self._ai_init_surface, (0,0))
+                            self._player.surface.blit(timer, timer_rect_player)
+                            self._ai.surface.blit(timer, timer_rect_ai)
+                            timer_size -= 3
+                        else:
+                            timer_size = self._count_down_size
+                            ticks_left -= 1
                 else:
-                    game_over = self._fonts['pixel_font'].render(f"GAME OVER!!", True, FONT_COLOR)
-                    retry = self._fonts_m['pixel_font'].render(f"Press Esc-Exit R-Retry", True, FONT_COLOR)
-                    game_over_rec = game_over.get_rect(center=(self._player.surface.get_width() / 2,
-                                                       self._player.surface.get_height() / 2 - 30))
-                    retry_rec = retry.get_rect(center=(self._player.surface.get_width() / 2,
-                                                       self._player.surface.get_height() / 2 + 20))
-                    self._player.surface.blit(game_over, game_over_rec)
-                    self._player.surface.blit(retry, retry_rec)
-                # AI step
-                if self._ai.running:
-                    self._ai.step(current_dir=self._ai.core.direction, vision=self._ai.core.vision)
-                else:
-                    ai_over = self._fonts['pixel_font'].render(f"GAME OVER!!", True, FONT_COLOR)
-                    ai_over_rec = ai_over.get_rect(center=(self._ai.surface.get_width() / 2,
-                                                           self._ai.surface.get_height() / 2))
-                    self._ai.surface.blit(ai_over, ai_over_rec)
+                # Player main loop
+                    if self._player.running and not self._start_transition:
+                        self._player.step(current_dir=self._player.core.direction, events=events)
+                    else:
+                        game_over = self._fonts['pixel_font'].render(f"GAME OVER!!", True, FONT_COLOR)
+                        retry = self._fonts_m['pixel_font'].render(f"Press Esc-Exit R-Retry", True, FONT_COLOR)
+                        game_over_rec = game_over.get_rect(center=(self._player.surface.get_width() / 2,
+                                                           self._player.surface.get_height() / 2 - 30))
+                        retry_rec = retry.get_rect(center=(self._player.surface.get_width() / 2,
+                                                           self._player.surface.get_height() / 2 + 20))
+                        self._player.surface.blit(game_over, game_over_rec)
+                        self._player.surface.blit(retry, retry_rec)
+                    # AI step
+                    if self._ai.running:
+                        self._ai.step(current_dir=self._ai.core.direction, vision=self._ai.core.vision)
+                    else:
+                        ai_over = self._fonts['pixel_font'].render(f"GAME OVER!!", True, FONT_COLOR)
+                        ai_over_rec = ai_over.get_rect(center=(self._ai.surface.get_width() / 2,
+                                                               self._ai.surface.get_height() / 2))
+                        self._ai.surface.blit(ai_over, ai_over_rec)
                 # Render game state
                 pygame.draw.rect(self._player.surface, (0, 0, 0), self._player.surface.get_rect(), 4)
                 pygame.draw.rect(self._ai.surface, (0, 0, 0), self._ai.surface.get_rect(), 4)
@@ -194,7 +235,7 @@ class GameVSAIDisplayer(GameDisplayerABC):
                 self._screen.blit(self._ai.surface, self._ai_anchor)
                 self._scoreboard()
                 pygame.display.flip()
-                clock.tick(self._speed)
+                clock.tick(speed)
                 if not self._player.running and not self._ai.running:
                     self._running = False
                     self._ended = True
