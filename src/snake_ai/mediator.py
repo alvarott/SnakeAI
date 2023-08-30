@@ -31,6 +31,7 @@ class APPMediator:
         self._training_conf_win = None
         self._training_win = None
         self._stats_win = None
+        self._running_model = None
 
     def start(self) -> None:
         """
@@ -110,10 +111,12 @@ class APPMediator:
         """
         model = self._check_model(brain_path)
         if isinstance(model, tuple):
+            self._running_model = brain_path
             game = GameModelDisplayer(size=(game_size[0], game_size[1]), speed=game_speed, show_path=show_path,
-                                      graphics=graphics, brain=model[1], vision=model[0])
+                                      graphics=graphics, brain=model[1], vision=model[0], mediator=self, reload=True)
             game.force_init()
             game.run()
+            self._running_model = None
 
     def main_to_try_model(self) -> None:
         """
@@ -174,6 +177,16 @@ class APPMediator:
         if self._stats_win is None:
             self._stats_win = StatsWindow(self._main_menu_win.window, self)
         self._win_transition(current_win=self._main_menu_win.window, next_win=self._stats_win.window)
+
+    def reload_model(self):
+        """
+        Loads the current model under training
+        :return:
+        """
+        if self._running_model is not None:
+            model = self._check_model(self._running_model)
+            return model[1]
+        return None
 
     def exit(self) -> None:
         """
