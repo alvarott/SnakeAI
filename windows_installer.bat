@@ -64,7 +64,7 @@ REM Variables
 set "directory=%CD%"
 set "app_root=%directory%\SnakeAI"
 set "env_dir=%app_root%\env"
-set "launcher=%app_root%\launcher.vbs"
+set "launcher=%app_root%\SnakeAI.vbs"
 set "config_dir=%app_root%\config"
 set "config_file=%config_dir%\setup_init.bat"
 
