@@ -4,7 +4,8 @@
 # Author: Álvaro Torralba
 # Date: 21/06/2023
 # Version: 0.0.1
-
+from snake_ai.gui import resources as rsc
+from importlib import resources as rc
 from snake_ai.gui.abc_button import ButtonABC
 from types import FunctionType
 import customtkinter as ctk
@@ -32,8 +33,9 @@ class WindowABC(ABC):
             self._window = ctk.CTk()
         else:
             self._window = ctk.CTkToplevel(top_level)
-            self._window.attributes('-alpha', 0)
+            self._window.attributes('-alpha', 10)
             self._window.protocol("WM_DELETE_WINDOW", self._closing_button_event)
+        self._window.after(230, lambda: self._window.iconbitmap(str(rc.files(rsc).joinpath('app_icon.ico'))))
         self._mediator = mediator
         self._width = size[0]
         self._height = size[1]
