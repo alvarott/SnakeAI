@@ -35,7 +35,7 @@ class GameModelDisplayer(GameDisplayerABC):
     """
 
     def __init__(self, size: tuple[int, int], speed: int, show_path: bool, graphics: str,
-                 brain: NN, vision: str, mediator = None, name: str = None, reload: bool = False):
+                 brain: NN, vision: str, mediator=None, name: str = None, reload: bool = False):
         """
         Constructor
         :param size: grid game size
@@ -158,7 +158,6 @@ class GameModelDisplayer(GameDisplayerABC):
             self._model = self._mediator.reload_model()
         self._ai = SnakeAIGUI(size=self._size, core=self._graphics, show_path=self._a_star, brain=self._model,
                               vision=self._vision, mode='autoP')
-
 
     def run(self):
         """
