@@ -661,8 +661,11 @@ class TrainingWindow(WindowABC):
             self._pgr_best.configure(text=f'ATB Sc: {self._best_score},    CB Sc: {plot_data[5]}, '
                                           f'    ATB Fit: {self._best_fit:.2f}M,    CB Fit: {plot_data[6]:.2f}M')
             # Save current best and las population
-            IO.save(Folders.models_folder, self._config['model'] + '.nn', self._batch.get_individual(best))
-            IO.save(Folders.populations_folder, self._config['model'] + '.pop', self._batch.population)
+            try:
+                IO.save(Folders.models_folder, self._config['model'] + '.nn', self._batch.get_individual(best))
+                IO.save(Folders.populations_folder, self._config['model'] + '.pop', self._batch.population)
+            except:
+                pass
 
         thread = Thread(target=work)
         thread.start()
