@@ -11,7 +11,7 @@ from snake_ai.genetic.genetic_algorithm import GA
 from snake_ai.gui.panels import ProgressBar
 from snake_ai.gui.abc_win import WindowABC
 from matplotlib.figure import Figure
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Lock
 from snake_ai.data import Folders
 import matplotlib.pyplot as plt
 from tkinter import messagebox
@@ -21,6 +21,7 @@ import customtkinter as ctk
 from time import time, sleep
 from snake_ai.IO import IO
 import os
+import sys
 
 
 class TrainingWindow(WindowABC):
@@ -102,9 +103,13 @@ class TrainingWindow(WindowABC):
         # General configuration labels
         self._conf_title = ctk.CTkLabel(master=self._set_frame, text=' General Config', font=self._font_bold,
                                         text_color=self._colors.blue_text)
+        self._model_name = ctk.CTkLabel(master=self._set_frame, text=' Model name', font=self._font_bold)
+        self._model_name_value = ctk.CTkLabel(master=self._set_frame,
+                                              text=f": {self._config['model']}",
+                                              font=self._font)
         self._game_size = ctk.CTkLabel(master=self._set_frame, text=' Game Size', font=self._font_bold)
         self._game_size_value = ctk.CTkLabel(master=self._set_frame,
-                                             text=f': ({configuration["game_size"][0]}x{configuration["game_size"][1]})',
+                                             text=f': {configuration["game_size"][0]}x{configuration["game_size"][1]}',
                                              font=self._font)
         self._conf_vision = ctk.CTkLabel(master=self._set_frame, text=' Vision', font=self._font_bold)
         self._conf_vision_value = ctk.CTkLabel(master=self._set_frame, text=f': {configuration["vision"]}',
@@ -181,7 +186,7 @@ class TrainingWindow(WindowABC):
         self._pgr_state = ctk.CTkLabel(master=self._prg_frame,
                                        text='Status: not initialized,     Elapsed Time: 00:00:00.000',
                                        font=self._font13b)
-        self._pgr_best = ctk.CTkLabel(master=self._prg_frame, text=f'ATB Sc: 0,    CB Sc: 0, '
+        self._pgr_best = ctk.CTkLabel(master=self._prg_frame, text=f'ATB Sc: 0,    CB Sc: 0,    CGames: 0,'
                                                                    f'    ATB Fit: 0.00M,    CB Fit: 0.00M',
                                       font=self._font13b)
         self._pgr_generation = ctk.CTkLabel(master=self._prg_frame, text='Generation: 0', font=self._font13b)
@@ -200,7 +205,6 @@ class TrainingWindow(WindowABC):
         self._conf_frame.grid_propagate(False)
         self._conf_frame.rowconfigure(index=0, weight=7, uniform='s')
         self._conf_frame.rowconfigure(index=1, weight=6, uniform='s')
-        # self._conf_frame.rowconfigure(index=2, weight=2, uniform='s')
         self._conf_frame.columnconfigure(index=(0, 1, 2), weight=1, uniform='s')
 
         # General configuration frame griding
@@ -240,12 +244,14 @@ class TrainingWindow(WindowABC):
 
         # General configuration labels placement
         self._conf_title.grid(column=0, row=0, columnspan=2, rowspan=2, sticky='sw', pady=1, padx=1)
-        self._game_size.grid(column=0, row=3, sticky='w', padx=2)
-        self._game_size_value.grid(column=1, row=3, sticky='w', padx=2)
-        self._conf_cpu.grid(column=0, row=4, sticky='w', padx=2)
-        self._conf_cpu_value.grid(column=1, row=4, sticky='w', padx=2)
-        self._conf_vision.grid(column=0, row=5, sticky='w', padx=2)
-        self._conf_vision_value.grid(column=1, row=5, sticky='w', padx=2)
+        self._model_name.grid(column=0, row=3, sticky='w', padx=2)
+        self._model_name_value.grid(column=1, row=3, sticky='w', padx=2)
+        self._game_size.grid(column=0, row=4, sticky='w', padx=2)
+        self._game_size_value.grid(column=1, row=4, sticky='w', padx=2)
+        self._conf_cpu.grid(column=0, row=5, sticky='w', padx=2)
+        self._conf_cpu_value.grid(column=1, row=5, sticky='w', padx=2)
+        self._conf_vision.grid(column=0, row=6, sticky='w', padx=2)
+        self._conf_vision_value.grid(column=1, row=6, sticky='w', padx=2)
 
         # NN configuration labels placement
         self._conf_neu.grid(column=0, row=0, columnspan=2, rowspan=2, sticky='sw', pady=1, padx=1)
@@ -348,6 +354,14 @@ class TrainingWindow(WindowABC):
             self._efficiency_plot.clear()
             self._turns_plot.clear()
             self._fitness_plot.clear()
+
+            # Limit memory usage
+            if len(self._avg_moves) > 10000:
+                self._avg_score = self._avg_score[1:]
+                self._avg_moves = self._avg_moves[1:]
+                self._avg_efficiency = self._avg_efficiency[1:]
+                self._avg_turns = self._avg_turns[1:]
+                self._avg_fitness = self._avg_fitness[1:]
 
             # Update plots
             x = [i for i in range(1, len(self._avg_score) + 1)]
@@ -658,8 +672,11 @@ class TrainingWindow(WindowABC):
             self._update_progressbar(plot_data[7])
             self._iterations.set(self._iterations.get() + 1)
             self._pgr_generation.configure(text=f'Generation: {self._iterations.get()}')
-            self._pgr_best.configure(text=f'ATB Sc: {self._best_score},    CB Sc: {plot_data[5]}, '
-                                          f'    ATB Fit: {self._best_fit:.2f}M,    CB Fit: {plot_data[6]:.2f}M')
+            self._pgr_best.configure(text=f'ATB Sc: {self._best_score},'
+                                          f'    CB Sc: {plot_data[5]},'
+                                          f'    CGames: {plot_data[7]},'
+                                          f'    ATB Fit: {self._best_fit:.2f}M,'
+                                          f'    CB Fit: {plot_data[6]:.2f}M')
             # Save current best and las population
             try:
                 IO.save(Folders.models_folder, self._config['model'] + '.nn', self._batch.get_individual(best))
@@ -705,11 +722,14 @@ class Worker:
     """
     This class provides a pickable working class to be call inside the main class (which is not pickable) as a process
     """
+    worker = 1
+    lock = Lock()
+
     def __init__(self, flag_queue: Queue, data_queue: Queue,):
         self._data = data_queue
         self._flag = flag_queue
 
-    def _work(self, batch: SnakeBatch, ga: GA) -> None:
+    def _work(self, batch: SnakeBatch, ga: GA, data_queue: Queue, flag_queue: Queue) -> None:
         """
         Executes all the snake games and writes the results over a pipe
         :param batch: snake batch object containing all game instances
@@ -722,8 +742,8 @@ class Worker:
         # Genetic process
         stats = batch.results
         best, fitness = ga.next_gen(population=population, scores=stats)
-        self._data.put((population, best, stats, fitness))
-        self._flag.put('ready')
+        data_queue.put((population, best, stats, fitness))
+        flag_queue.put('ready')
 
     def work(self, batch: SnakeBatch, ga: GA) -> None:
         """
@@ -732,5 +752,8 @@ class Worker:
         :param ga: genetic algorithm instance object
         :return:
         """
-        process = Process(target=self._work, args=(batch, ga,))
-        process.start()
+        with Worker.lock:
+            process = Process(target=self._work, args=(batch, ga, self._data, self._flag))
+            process.start()
+            process.join()
+
