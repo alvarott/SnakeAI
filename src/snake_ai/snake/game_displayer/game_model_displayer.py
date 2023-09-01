@@ -152,10 +152,10 @@ class GameModelDisplayer(GameDisplayerABC):
         Resets the state of the game
         :return:
         """
-        print(self._games)
-        if self._games == 3 and self._reload:
+        if self._games == 5 and self._reload:
             self._games = 0
-            self._model = self._mediator.reload_model()
+            new_model = self._mediator.reload_model()
+            self._model = new_model if isinstance(new_model, NN) else self._model
         self._ai = SnakeAIGUI(size=self._size, core=self._graphics, show_path=self._a_star, brain=self._model,
                               vision=self._vision, mode='autoP')
 
