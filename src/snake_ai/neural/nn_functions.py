@@ -56,11 +56,13 @@ class _Activation:
         """
         Softmax activation function
         :param matrix: matrix on which to apply softmax
-        :return relu: a matrix with the same dimensions with the softmax function applied element wise
+        :return: a matrix with the same dimensions with the softmax function applied element wise
         """
-        # shifted_matrix = matrix - np.max(matrix)
-        exp = np.exp(matrix)
-        return exp / np.sum(exp)
+        e = np.exp(matrix - np.max(matrix))
+        if e.ndim == 1:
+            return e / np.sum(e, axis=0)
+        else:
+            return e / np.sum(e, axis=1, keepdims=True)
 
 
 class _Initialization:
