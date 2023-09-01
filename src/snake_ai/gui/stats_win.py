@@ -23,7 +23,8 @@ class StatsWindow(WindowABC):
     """
 
     def __init__(self, top_level: ctk.CTk, mediator):
-        super().__init__(size=(600, 600), resizeable=False, top_level=top_level, mediator=mediator)
+        super().__init__(size=(600, 600), resizeable=False, top_level=top_level, mediator=mediator,
+                         anchor_prev='center')
         plt.style.use('bmh')
         # data
         self._data = {}

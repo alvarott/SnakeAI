@@ -23,7 +23,8 @@ class TrainingConfigWindow(WindowABC):
     Implements the training configuration window
     """
     def __init__(self, top_level: ctk.CTk, mediator):
-        super().__init__(size=(320, 400), resizeable=False, top_level=top_level, mediator=mediator)
+        super().__init__(size=(320, 400), resizeable=False, top_level=top_level, mediator=mediator,
+                         anchor_prev='topleft')
         # Master Frames
         self._master_frame = ctk.CTkFrame(master=self.window)
         self._master_frame.rowconfigure(index=0, weight=9, uniform='i')

@@ -52,6 +52,7 @@ class APPMediator:
         :param current_win: current opened window instance
         :return:
         """
+        self._main_menu_win.center_to_current('topleft', current_win)
         self._win_transition(current_win=current_win, next_win=self._main_menu_win.window)
 
     def back_to_training_config(self, current_win: ctk.CTk, destroy: bool) -> None:
@@ -74,6 +75,8 @@ class APPMediator:
         """
         if self._vsai_conf_win is None:
             self._vsai_conf_win = GameConfigWindow(self._main_menu_win.window, self, 'vsai')
+        else:
+            self._vsai_conf_win.center_to_current('topleft', self._main_menu_win.window)
         self._win_transition(current_win=self._main_menu_win.window, next_win=self._vsai_conf_win.window)
 
     def launch_vsai(self, game_size: tuple[int, int], game_speed: int, show_path: bool, graphics: str,
@@ -125,6 +128,8 @@ class APPMediator:
         """
         if self._model_conf_win is None:
             self._model_conf_win = GameConfigWindow(self._main_menu_win.window, self, 'model')
+        else:
+            self._model_conf_win.center_to_current('topleft', self._main_menu_win.window)
         self._win_transition(current_win=self._main_menu_win.window, next_win=self._model_conf_win.window)
 
     def launch_model(self, game_size: tuple[int, int], game_speed: int, show_path: bool, graphics: str,
@@ -157,6 +162,8 @@ class APPMediator:
         """
         if self._training_conf_win is None:
             self._training_conf_win = TrainingConfigWindow(self._main_menu_win.window, self)
+        else:
+            self._training_conf_win.center_to_current('topleft', self._main_menu_win.window)
         self._win_transition(current_win=self._main_menu_win.window, next_win=self._training_conf_win.window)
 
     def training_widow(self, params: dict, prev_population: dict | None) -> None:
@@ -167,6 +174,7 @@ class APPMediator:
         :return:
         """
         self._training_win = TrainingWindow(self._training_conf_win.window, self, params, prev_population)
+        self._training_win.center_to_current('center_screen', self._training_conf_win.window)
         self._win_transition(current_win=self._training_conf_win.window, next_win=self._training_win.window)
 
     def statistics_window(self) -> None:
@@ -176,6 +184,8 @@ class APPMediator:
         """
         if self._stats_win is None:
             self._stats_win = StatsWindow(self._main_menu_win.window, self)
+        else:
+            self._stats_win.center_to_current('topleft', self._main_menu_win.window)
         self._win_transition(current_win=self._main_menu_win.window, next_win=self._stats_win.window)
 
     def reload_model(self):
