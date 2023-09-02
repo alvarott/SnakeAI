@@ -419,12 +419,12 @@ class TrainingConfigWindow(WindowABC):
             self._replacement_lb = ctk.CTkLabel(master=self, text="  Replacement", font=self._font)
             self._offspring_lb = ctk.CTkLabel(master=self, text="     Offspring", font=self._font)
             # Widgets
-            self._population_w = NumericEntry(master=self, from_=1, to=2000, step=10, type='int',
+            self._population_w = NumericEntry(master=self, from_=1, to=1000, step=10, type='int',
                                               label=self._population_lb)
             self._selection_w = DropDownPanel(master=self, options=self._genetic_data.selection,
                                               command=self._select_behavior,
                                               mouse_wheel_func=self._select_behavior)
-            self._tournament_w = NumericEntry(master=self, from_=1, to=500, step=10, type='int',
+            self._tournament_w = NumericEntry(master=self, from_=1, to=250, step=10, type='int',
                                               label=self._tournament_lb)
             self._crossover_w = DropDownPanel(master=self, options=list(self._genetic_data.crossover.keys()),
                                               command=self._crossover_behavior,
@@ -443,7 +443,7 @@ class TrainingConfigWindow(WindowABC):
             self._replacement_w = DropDownPanel(master=self, options=self._genetic_data.replacement,
                                                 command=self._replacement_behavior,
                                                 mouse_wheel_func=self._replacement_behavior)
-            self._offspring_w = NumericEntry(master=self, from_=1, to=500, step=10, type='int',
+            self._offspring_w = NumericEntry(master=self, from_=1, to=250, step=10, type='int',
                                              label=self._offspring_lb)
 
             # Entries

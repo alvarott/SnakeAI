@@ -421,13 +421,13 @@ class ArrayEntry(Entry):
         return values
 
     def _value_behavior(self, *args):
-        pattern = r'(^(?:100|[1-9][0-9]?)(?:,(?:100|[1-9][0-9]?)(?=,|$))*(?:,)?)*$'
+        pattern = r'(^(?:[1-9]|[1-3][0-9]|40?)(?:,(?:[1-9]|[1-3][0-9]|40?)(?=,|$))*(?:,)?)*$'
         input = self._value.get()
         counter = 0
         for char in input:
             if char == ',':
                 counter += 1
-        if counter > 10:
+        if counter > 7:
             self._value.set(self._backup_value.get())
             input = self._value.get()
         if not re.match(pattern, input):
