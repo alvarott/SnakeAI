@@ -29,7 +29,7 @@ class GridOps:
             raise ValueError(f'vision type: "{vision}" not supported')
 
     @staticmethod
-    def _belong(dimensions: tuple[int, int], point: np.ndarray) -> bool:
+    def _belong(dimensions: tuple[int, ...], point: np.ndarray) -> bool:
         """
         Checks if a given point belong to and N x M grid
         :param dimensions: weight and height of the grid

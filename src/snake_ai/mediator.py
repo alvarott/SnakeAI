@@ -174,7 +174,6 @@ class APPMediator:
         :return:
         """
         self._training_win = TrainingWindow(self._training_conf_win.window, self, params, prev_population)
-        self._training_win.center_to_current('center_screen', self._training_conf_win.window)
         self._win_transition(current_win=self._training_conf_win.window, next_win=self._training_win.window)
 
     def statistics_window(self) -> None:
