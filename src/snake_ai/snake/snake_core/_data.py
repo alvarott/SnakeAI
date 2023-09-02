@@ -116,16 +116,6 @@ class StatsStruct:
     """
     Data class to hold the performance metrics
     """
-    max_score: int
-    score: int
-    total_moves: int
-    moves: int
-    mpa: list[float]  # Moves per apple
-    cmp: int  # Current minimal path
-    turns: int
-    accuracy: float
-    efficiency: float
-
     def __init__(self, rows: int, cols: int):
         """
         Constructor
@@ -141,6 +131,10 @@ class StatsStruct:
         self.mpa = []
         self.accuracy = 0
         self.efficiency = 0
+        self.current_dir = None
+        self.left_moves = 0
+        self.right_moves = 0
+        self.straight_moves = 0
 
     def __str__(self) -> str:
         string = f"""
@@ -151,6 +145,23 @@ class StatsStruct:
         Efficiency : {self.efficiency}
         """
         return string
+
+    def dir_change(self, new_dir: GameDirection) -> None:
+        """
+        Checks if the snake is changing the spinning direction
+        :param new_dir: new direction that is taking
+        :return:
+        """
+        clk_dirs = [GameDirection.UP, GameDirection.LEFT, GameDirection.DOWN, GameDirection.RIGHT]
+        dir_idx = clk_dirs.index(self.current_dir)
+        if (dir_idx < len(clk_dirs) - 1 and clk_dirs[dir_idx + 1].value == new_dir.value) \
+                or (dir_idx == len(clk_dirs) - 1 and clk_dirs[0].value == new_dir.value):
+            self.left_moves += 1
+        elif self.current_dir.value != new_dir.value:
+            self.right_moves += 1
+        else:
+            self.straight_moves += 1
+        self.current_dir = new_dir
 
     def _add_mpa(self) -> None:
         """
@@ -211,4 +222,5 @@ class StatsStruct:
         :return dict:
         """
         return dict({'max_score': self.max_score, 'score': self.score, 'moves': self.total_moves, 'turns': self.turns,
-                     'accuracy': self.accuracy, 'efficiency': self.efficiency})
+                     'accuracy': self.accuracy, 'efficiency': self.efficiency, 'lmoves': self.left_moves,
+                     'rmoves': self.right_moves, 'smoves': self.straight_moves})

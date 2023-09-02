@@ -56,6 +56,7 @@ class SnakeCore:
         self._place_snake()
         self._spawn_apple()
         self._set_cmp()
+        self._stats_data.current_dir = self.direction
         if self._auto:
             self._set_vision()
             self._moves_limit = (math.ceil(3 * self._stats_data.cmp) if mode == 'autoT'
@@ -181,6 +182,8 @@ class SnakeCore:
 
         # Update head
         self._snake.add((i, j), direction)
+        # Update spinning direction check
+        self._stats_data.dir_change(direction)
         # Check collisions
         if self._collision():
             self._running = False
