@@ -28,30 +28,54 @@ class _Fitness:
         :param individuals: lists with individuals id's and them performance stats
         :return results: dictionary with the individual id and its fitness value pairs
         """
-        def function(max_score: float, score: float, efficiency: float, moves: float):
+        def function(max_score: float, score: float, efficiency: float, moves: float, lmoves: float, rmoves: float):
             """
             Auxiliary function that contains the mathematical logic of the fitness function
             :param max_score: maximum possible score
             :param score: real score
             :param efficiency: efficiency as the average of steps taken in relation with the minimum possible path
             :param moves: number of total moves
+            :param lmoves: number of moves taken to the left
+            :param rmoves: number of moves taken to the right
             :return fitness:  fitness value
             """
-            fitness = (score ** 5 + (moves / 100) ** 5)
+            penalty = 0.5
+            if lmoves == 0 and rmoves == 0:
+                penalty = 0
+            elif (max_score * 0.1) < score <= (max_score * 0.4):
+                if lmoves == 0 or rmoves == 0:
+                    penalty = 0.2
+                elif min(lmoves, rmoves) / max(lmoves, rmoves) > 0.6:
+                    penalty = 0.8
+                else:
+                    penalty = 1
+            elif (max_score * 0.4) < score:
+                penalty = 1
+            fitness = (score ** 3 + (moves / 100) ** 3) * penalty
             extra = 0
             if score == max_score:
-                extra = (score * efficiency) ** 5
+                extra = (score * efficiency) ** 3
             return fitness + extra
 
         results: dict[int, float] = {}
         # Calculate population's fitness
+        best = None
+        max_fit = 0
         for individual in individuals:
             max_score = individual[1]['max_score']
             score = individual[1]['score']
             effi = individual[1]['efficiency']
             moves = individual[1]['moves']
-            fitness = function(max_score, score, effi, moves)
+            lmoves = individual[1]['lmoves']
+            rmoves = individual[1]['rmoves']
+            fitness = function(max_score, score, effi, moves, lmoves, rmoves)
+            if max_fit <= fitness:
+                max_fit = fitness
+                best = individual
             results[individual[0]] = fitness
+        print(best)
+        print(max_fit)
+        print()
         return results
 
 
