@@ -27,8 +27,7 @@ class GeneralConfig:
     vision: list[str] = field(default_factory=lambda: ['Binary', 'Real'])
     training_grid_size: dict[str, tuple[int, int]] = field(default_factory=lambda: {'10x10': (10, 10),
                                                                                     '15x15': (15, 15),
-                                                                                    '20x20': (20, 20),
-                                                                                    '25x25': (25, 25)})
+                                                                                    '20x20': (20, 20)})
 
 
 @dataclass
