@@ -59,8 +59,6 @@ class _Fitness:
 
         results: dict[int, float] = {}
         # Calculate population's fitness
-        best = None
-        max_fit = 0
         for individual in individuals:
             max_score = individual[1]['max_score']
             score = individual[1]['score']
@@ -69,13 +67,7 @@ class _Fitness:
             lmoves = individual[1]['lmoves']
             rmoves = individual[1]['rmoves']
             fitness = function(max_score, score, effi, moves, lmoves, rmoves)
-            if max_fit <= fitness:
-                max_fit = fitness
-                best = individual
             results[individual[0]] = fitness
-        print(best)
-        print(max_fit)
-        print()
         return results
 
 
@@ -205,7 +197,7 @@ class _Crossover:
 
         For large values of eta there is a higher probability that offspring will be created near the parents.
         For small values of eta, offspring will be more distant from parents
-        Source :
+        Source : https://github.com/Chrispresso/SnakeAI
         """
         # Calculate Gamma
         rand = np.random.random(parent1.shape)

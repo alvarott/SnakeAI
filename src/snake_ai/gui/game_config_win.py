@@ -45,7 +45,7 @@ class GameConfigWindow(WindowABC):
                                      options=list(GameConfigWindow.game_speed.keys()))
         self._speed.configure(border_color='grey', border_width=1)
         self._dialog = IOFile(master=self.window, width=300, height=65, text='Select Model', locking_window=self.window,
-                              default_file_path=os.path.join(Folders.models_folder, 'default_binary.nn'),
+                              default_file_path=os.path.join(Folders.models_folder, 'binary_40_spa.nn'),
                               file_types=[("model files (*.nn)", "*.nn"), ("all files (*.*)", "*.*")])
         self._dialog.configure(border_color='grey', border_width=1)
         # Trace
