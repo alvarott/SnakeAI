@@ -54,34 +54,34 @@ class TrainingWindow(WindowABC):
         self._moves_fig = Figure(figsize=(5, 3.5), dpi=100)
         self._score_fig = Figure(figsize=(5, 3.5), dpi=100)
         self._efficiency_fig = Figure(figsize=(5, 3.5), dpi=100)
-        self._turns_fig = Figure(figsize=(5, 3.5), dpi=100)
+        self._score_hist_fig = Figure(figsize=(5, 3.5), dpi=100)
         self._fitness_fig = Figure(figsize=(5, 3.5), dpi=100)
 
         # Plots
         self._moves_plot = self._moves_fig.add_subplot()
         self._score_plot = self._score_fig.add_subplot()
         self._efficiency_plot = self._efficiency_fig.add_subplot()
-        self._turns_plot = self._turns_fig.add_subplot()
+        self._scores_plot = self._score_hist_fig.add_subplot()
         self._fitness_plot = self._fitness_fig.add_subplot()
         # Plot labels
         self._moves_plot.set_title('Average Moves')
         self._score_plot.set_title('Individual Score')
         self._efficiency_plot.set_title('Average Efficiency')
-        self._turns_plot.set_title('Average Turns')
+        self._scores_plot.set_title('Population Scores')
         self._fitness_plot.set_title('Average Fitness')
 
         # Plot Data
         self._avg_fitness = []
         self._avg_score = []
         self._avg_moves = []
-        self._avg_turns = []
+        self._last_scores = []
         self._avg_efficiency = []
 
         # Canvas
         self._moves_canvas = FigureCanvasTkAgg(figure=self._moves_fig, master=self._master_frame)
         self._score_canvas = FigureCanvasTkAgg(figure=self._score_fig, master=self._master_frame)
         self._efficiency_canvas = FigureCanvasTkAgg(figure=self._efficiency_fig, master=self._master_frame)
-        self._turns_canvas = FigureCanvasTkAgg(figure=self._turns_fig, master=self._master_frame)
+        self._scores_hist_canvas = FigureCanvasTkAgg(figure=self._score_hist_fig, master=self._master_frame)
         self._fitness_canvas = FigureCanvasTkAgg(figure=self._fitness_fig, master=self._master_frame)
 
         # Buttons
@@ -186,8 +186,7 @@ class TrainingWindow(WindowABC):
         self._pgr_state = ctk.CTkLabel(master=self._prg_frame,
                                        text='Status: not initialized,     Elapsed Time: 00:00:00.000',
                                        font=self._font13b)
-        self._pgr_best = ctk.CTkLabel(master=self._prg_frame, text=f'ATB Sc: 0,    CB Sc: 0,    CGames: 0,'
-                                                                   f'    ATB Fit: 0.00M,    CB Fit: 0.00M',
+        self._pgr_best = ctk.CTkLabel(master=self._prg_frame, text=f'All Time Best Score: 0,    Current Best Score: 0',
                                       font=self._font13b)
         self._pgr_generation = ctk.CTkLabel(master=self._prg_frame, text='Generation: 0', font=self._font13b)
 
@@ -239,7 +238,7 @@ class TrainingWindow(WindowABC):
         self._moves_canvas.get_tk_widget().grid(column=0, row=0, sticky='news', padx=5, pady=5)
         self._score_canvas.get_tk_widget().grid(column=1, row=0, sticky='news', padx=5, pady=5)
         self._efficiency_canvas.get_tk_widget().grid(column=2, row=0, sticky='news', padx=5, pady=5)
-        self._turns_canvas.get_tk_widget().grid(column=0, row=1, sticky='news', padx=5, pady=5)
+        self._scores_hist_canvas.get_tk_widget().grid(column=0, row=1, sticky='news', padx=5, pady=5)
         self._fitness_canvas.get_tk_widget().grid(column=2, row=1, sticky='news', padx=5, pady=5)
 
         # General configuration labels placement
@@ -304,7 +303,6 @@ class TrainingWindow(WindowABC):
         # GUI & multiprocessing control
         self._limit_score = self._config['game_size'][0] * self._config['game_size'][1] - 3
         self._best_score = 0
-        self._best_fit = 0
         self._max_progress = 0
         self._running = ctk.BooleanVar(value=False)
         self._displaying = ctk.BooleanVar(value=False)
@@ -352,7 +350,7 @@ class TrainingWindow(WindowABC):
             self._moves_plot.clear()
             self._score_plot.clear()
             self._efficiency_plot.clear()
-            self._turns_plot.clear()
+            self._scores_plot.clear()
             self._fitness_plot.clear()
 
             # Limit memory usage
@@ -360,7 +358,6 @@ class TrainingWindow(WindowABC):
                 self._avg_score = self._avg_score[1:]
                 self._avg_moves = self._avg_moves[1:]
                 self._avg_efficiency = self._avg_efficiency[1:]
-                self._avg_turns = self._avg_turns[1:]
                 self._avg_fitness = self._avg_fitness[1:]
 
             # Update plots
@@ -368,21 +365,21 @@ class TrainingWindow(WindowABC):
             self._moves_plot.plot(x, self._avg_moves)
             self._score_plot.plot(x, self._avg_score)
             self._efficiency_plot.plot(x, self._avg_efficiency)
-            self._turns_plot.plot(x, self._avg_turns)
+            self._scores_plot.hist(self._last_scores, bins=15 , edgecolor='black')
             self._fitness_plot.plot(x, self._avg_fitness)
 
             # Titles
             self._moves_plot.set_title('Average Moves')
             self._score_plot.set_title('Average Score')
             self._efficiency_plot.set_title('Average Efficiency')
-            self._turns_plot.set_title('Average Turns')
+            self._scores_plot.set_title('Population Scores')
             self._fitness_plot.set_title('Average Fitness')
 
             # Draw plots
             self._moves_canvas.draw()
             self._score_canvas.draw()
             self._efficiency_canvas.draw()
-            self._turns_canvas.draw()
+            self._scores_hist_canvas.draw()
             self._fitness_canvas.draw()
 
         thread = Thread(target=work)
@@ -560,7 +557,7 @@ class TrainingWindow(WindowABC):
             self._kill_button.configure(state='disabled')
             self._training()
 
-    def _update_best(self, new_max_sc: float, new_max_fit: float) -> None:
+    def _update_best(self, new_max_sc: float) -> None:
         """
         Updates the best recorded individual score and fitness
         :param new_max_sc: last generation maximal score
@@ -568,7 +565,6 @@ class TrainingWindow(WindowABC):
         :return:
         """
         self._best_score = self._best_score if self._best_score > new_max_sc else new_max_sc
-        self._best_fit = self._best_fit if self._best_fit > new_max_fit else new_max_fit
 
     def _update_progressbar(self, total_max_sc: int) -> None:
         """
@@ -664,19 +660,16 @@ class TrainingWindow(WindowABC):
             # Update plots data
             self._avg_fitness.append(plot_data[0])
             self._avg_score.append(plot_data[1])
-            self._avg_turns.append(plot_data[2])
+            self._last_scores = plot_data[2]
             self._avg_moves.append(plot_data[3])
             self._avg_efficiency.append(plot_data[4])
             # Update GUI stats
-            self._update_best(new_max_sc=plot_data[5], new_max_fit=plot_data[6])
-            self._update_progressbar(plot_data[7])
+            self._update_best(new_max_sc=plot_data[5])
+            self._update_progressbar(plot_data[6])
             self._iterations.set(self._iterations.get() + 1)
             self._pgr_generation.configure(text=f'Generation: {self._iterations.get()}')
-            self._pgr_best.configure(text=f'ATB Sc: {self._best_score},'
-                                          f'    CB Sc: {plot_data[5]},'
-                                          f'    CGames: {plot_data[7]},'
-                                          f'    ATB Fit: {self._best_fit:.2f}M,'
-                                          f'    CB Fit: {plot_data[6]:.2f}M')
+            self._pgr_best.configure(text=f'All Time Best Score: {self._best_score},'
+                                          f'    Current Best Score: {plot_data[5]}')
             # Save current best and las population
             try:
                 IO.save(Folders.models_folder, self._config['model'] + '.nn', self._batch.get_individual(best))
@@ -707,15 +700,12 @@ class Stats:
             efficiencies.append(i[1]['efficiency'])
         # Calculate averages
         fitness_avg = sum(list(fitness.values())) / len(fitness)
-        fitness_max = max(list(fitness.values()))
         score_avg = sum(scores) / len(scores)
         score_max = max(scores)
         total_max_sc = scores.count(limit_score)
-        turns_avg = sum(turns) / len(turns)
         moves_avg = sum(moves) / len(moves)
         efficiencies_avg = sum(efficiencies) / len(efficiencies)
-        return (fitness_avg, score_avg, turns_avg, moves_avg, efficiencies_avg, score_max, (fitness_max / 1000000),
-                total_max_sc)
+        return fitness_avg, score_avg, scores, moves_avg, efficiencies_avg, score_max, total_max_sc
 
 
 class Worker:
@@ -756,4 +746,3 @@ class Worker:
             process = Process(target=self._work, args=(batch, ga, self._data, self._flag))
             process.start()
             process.join()
-
