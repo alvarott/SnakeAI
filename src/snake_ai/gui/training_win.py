@@ -4,24 +4,22 @@
 # Date: 08/08/2023
 # Version: 0.0.1
 
-from snake_ai.snake.game_process.snake_batch_process import SnakeBatch
-from snake_ai.gui._data import Colors, GAShortNames, GeneticConfig
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from snake_ai.genetic.genetic_algorithm import GA
+from multiprocessing.sharedctypes import Value, Array
+from multiprocessing import Queue, Event, Lock
+from snake_ai.gui._data import Colors, GAShortNames
 from snake_ai.gui.panels import ProgressBar
 from snake_ai.gui.abc_win import WindowABC
+from snake_ai.trainer.worker import Worker
 from matplotlib.figure import Figure
-from multiprocessing import Process, Queue, Lock
 from snake_ai.data import Folders
 import matplotlib.pyplot as plt
 from tkinter import messagebox
 from datetime import timedelta
 from threading import Thread
-import customtkinter as ctk
 from time import time, sleep
-from snake_ai.IO import IO
+import customtkinter as ctk
 import os
-import sys
 
 
 class TrainingWindow(WindowABC):
@@ -36,12 +34,32 @@ class TrainingWindow(WindowABC):
         self._config = configuration
         self._colors = Colors()
         self._short = GAShortNames()
-        self._ga_map = GeneticConfig()
         self._start_time = 0.0
         self._accumulated_time = 0.0
-        # Training Objects
-        self._batch: SnakeBatch | None = None
-        self._ga: GA | None = None
+
+        # GUI control variables
+        self._limit_score = self._config['game_size'][0] * self._config['game_size'][1] - 3
+        self._best_score = 0
+        self._max_progress = 0
+        self._running = ctk.BooleanVar(value=False)
+        self._displaying = ctk.BooleanVar(value=False)
+        self._started = False
+        self._iterations = ctk.IntVar(value=0)
+        self._block_display = True
+        self._update_time = ctk.BooleanVar(value=False)
+        self._initializing = ctk.BooleanVar(value=False)
+
+        # Multiprocessing shared and control variables
+        self._data_queue = Queue()
+        self._done_queue = Queue()
+        self._training_flag = Value('i', 0)
+        self._worker_state = Array('c', b'cr')
+        self._file_lock = Lock()
+        self._sync_event = Event()
+        self._worker = Worker(loop_flag=self._training_flag, data_queue=self._data_queue,
+                              termination_queue=self._done_queue, sync=self._sync_event, file_lock=self._file_lock,
+                              worker_state=self._worker_state)
+
         # Master Frames
         self._master_frame = ctk.CTkFrame(master=self.window)
         self._conf_frame = ctk.CTkFrame(master=self._master_frame)
@@ -67,13 +85,16 @@ class TrainingWindow(WindowABC):
         self._moves_plot.set_title('Average Moves')
         self._score_plot.set_title('Individual Score')
         self._efficiency_plot.set_title('Average Efficiency')
-        self._scores_plot.set_title('Population Scores')
+        self._scores_plot.set_title('Last Population Scores')
         self._fitness_plot.set_title('Average Fitness')
 
         # Plot Data
         self._avg_fitness = []
         self._avg_score = []
         self._avg_moves = []
+        self._avg_smoves = []
+        self._avg_rmoves = []
+        self._avg_lmoves = []
         self._last_scores = []
         self._avg_efficiency = []
 
@@ -300,34 +321,11 @@ class TrainingWindow(WindowABC):
         self._display_button.configure(state='disabled')
         self._kill_button.place(x=358, y=100)
 
-        # GUI & multiprocessing control
-        self._limit_score = self._config['game_size'][0] * self._config['game_size'][1] - 3
-        self._best_score = 0
-        self._max_progress = 0
-        self._running = ctk.BooleanVar(value=False)
-        self._displaying = ctk.BooleanVar(value=False)
-        self._started = False
-        self._iterations = ctk.IntVar(value=0)
-        self._block_display = True
-        self._update_time = ctk.BooleanVar(value=False)
-        self._data_queue = Queue()
-        self._flag_queue = Queue()
-        self._worker = Worker(self._flag_queue, self._data_queue)
-        self._initializing = ctk.BooleanVar(value=False)
-
         # Traces
         self._running.trace('w', self._set_stopped)
         self._displaying.trace('w', self._set_displaying)
         self._iterations.trace('w', self._plotting)
         self._update_time.trace('w', self._timer)
-
-    def _work(self) -> None:
-        """
-        Wrapper method to prevent GUI for freezing while creating the child process
-        :return:
-        """
-        thread = Thread(target=self._worker.work, args=(self._batch, self._ga))
-        thread.start()
 
     def _plotting(self, *args) -> None:
         """
@@ -346,6 +344,7 @@ class TrainingWindow(WindowABC):
         :return:
         """
         def work():
+            t = time()
             # Clean plots
             self._moves_plot.clear()
             self._score_plot.clear()
@@ -357,12 +356,19 @@ class TrainingWindow(WindowABC):
             if len(self._avg_moves) > 10000:
                 self._avg_score = self._avg_score[1:]
                 self._avg_moves = self._avg_moves[1:]
+#                 # self._avg_smoves = self._avg_moves[1:]
+#                 # self._avg_rmoves = self._avg_moves[1:]
+#                 # self._avg_lmoves = self._avg_moves[1:]
                 self._avg_efficiency = self._avg_efficiency[1:]
                 self._avg_fitness = self._avg_fitness[1:]
 
             # Update plots
             x = [i for i in range(1, len(self._avg_score) + 1)]
             self._moves_plot.plot(x, self._avg_moves)
+            # self._moves_plot.plot(x, self._avg_smoves, label='straight')
+            # self._moves_plot.plot(x, self._avg_rmoves, label='right')
+            # self._moves_plot.plot(x, self._avg_lmoves, label='left')
+            # self._moves_plot.legend()
             self._score_plot.plot(x, self._avg_score)
             self._efficiency_plot.plot(x, self._avg_efficiency)
             self._scores_plot.hist(self._last_scores, bins=15 , edgecolor='black')
@@ -372,7 +378,7 @@ class TrainingWindow(WindowABC):
             self._moves_plot.set_title('Average Moves')
             self._score_plot.set_title('Average Score')
             self._efficiency_plot.set_title('Average Efficiency')
-            self._scores_plot.set_title('Population Scores')
+            self._scores_plot.set_title('Last Population Scores')
             self._fitness_plot.set_title('Average Fitness')
 
             # Draw plots
@@ -381,6 +387,12 @@ class TrainingWindow(WindowABC):
             self._efficiency_canvas.draw()
             self._scores_hist_canvas.draw()
             self._fitness_canvas.draw()
+
+            print('worker liberado')
+            # Synchronize with child process
+            self._sync_event.set()
+            print(timedelta(seconds=time() - t))
+            self._trace_queue()
 
         thread = Thread(target=work)
         thread.start()
@@ -396,9 +408,9 @@ class TrainingWindow(WindowABC):
         else:
             # Close all queues
             self._data_queue.close()
-            self._flag_queue.close()
+            self._done_queue.close()
             self._data_queue.join_thread()
-            self._flag_queue.join_thread()
+            self._done_queue.join_thread()
             super()._closing_button_event()
 
     def _timer(self, *args) -> None:
@@ -481,6 +493,7 @@ class TrainingWindow(WindowABC):
                                             game_speed=25,
                                             show_path=False,
                                             graphics='SnakeHWGUI',
+                                            lock=self._file_lock,
                                             brain_path=os.path.join(Folders.models_folder,
                                                                     self._config['model'] + '.nn'))
             self._displaying.set(False)
@@ -488,16 +501,13 @@ class TrainingWindow(WindowABC):
         thread = Thread(target=display)
         thread.start()
 
-    def _trace_queue(self, active: bool) -> None:
+    def _trace_queue(self) -> None:
         """
         Controls the waiting loop while the working child process writes data to consume over the pipe
-        :param active: flag to continue or stop the traicing
+        :param active: flag to continue or stop the tracing
         :return:
         """
-        if active:
-            self._trace_id = self.window.after(500, self._check_queue)
-        else:
-            self.window.after_cancel(self._trace_id)
+        self.window.after(500, self._check_queue)
 
     def _check_queue(self):
         """
@@ -506,34 +516,50 @@ class TrainingWindow(WindowABC):
         :return:
         """
         if self._started:
-            if self._flag_queue.empty():
-                self._trace_queue(True)
+            if self._data_queue.empty():
+                self._trace_queue()
             else:
-                self._flag_queue.get()
-                self._refresh_gui()
-                self._work()
-                self._trace_queue(True)
+                self._refresh_gui('activo')
         else:
-            if self._flag_queue.empty() and self._running:
-                self._trace_queue(True)
+            if self._worker_state.value == b'wr':
+                self._trace_queue()
+            elif self._worker_state.value == b'wt':
+                self._refresh_gui('parado')
             else:
-                self._flag_queue.get()
-                self._refresh_gui()
-                self._trace_queue(False)
-                self._running.set(False)
+                if self._done_queue.empty() and self._running.get():
+                    self._trace_queue()
+                else:
+                    self._running.set(False)
+                    self._worker.batch.update_brains(self._done_queue.get())
+
+    def _trace_start(self, thread: Thread):
+        """
+        Traces creation of the subprocess to avoid GUI freezing
+        :param thread:
+        :return:
+        """
+        if thread.is_alive():
+            self.window.after(500, self._trace_start, thread)
+        else:
+            # Trace child progress
+            self._start_stop_button.configure(state='normal')
+            self._trace_queue()
 
     def _training(self) -> None:
         """
         Sets up the GUI control variables to start the training and starts it
         :return:
         """
-        self._start_stop_button.configure(text='Stop', state='normal')
+        self._start_stop_button.configure(text='Stop', state='disabled')
         self._start_time = time()
         self._update_time.set(True)
         self._started = True
         self._running.set(True)
-        self._work()
-        self._trace_queue(True)
+        # Spawn child process using a thread to decrease freezing from GUI
+        self._training_flag.value = 1
+        thread = Thread(target=self._worker.train)
+        thread.start()
+        self._trace_start(thread)
 
     def _start_behavior(self) -> None:
         """
@@ -552,6 +578,8 @@ class TrainingWindow(WindowABC):
             self._pgr_state.configure(text=f'Status: Ending,     '
                                            f'Elapsed Time: {self._elapsed_time_str(self._accumulated_time)}')
             self._started = False
+            # Flag child process to terminate
+            self._training_flag.value = 0
         # Resume training
         else:
             self._kill_button.configure(state='disabled')
@@ -586,9 +614,8 @@ class TrainingWindow(WindowABC):
         :return:
         """
         if thread.is_alive():
-            self._trace_id = self.window.after(500, self._trace_init, thread)
+            self.window.after(500, self._trace_init, thread)
         else:
-            self.window.after_cancel(self._trace_id)
             self._initializing.set(False)
             self._training()
 
@@ -598,46 +625,7 @@ class TrainingWindow(WindowABC):
         :return:
         """
         def work():
-            # Create population
-            self._batch = SnakeBatch(individuals=self._config['population'],
-                                     cpu_cores=self._config['cpu'],
-                                     size=self._config['game_size'],
-                                     input=22,
-                                     output=3,
-                                     hidden=self._config['hidden'],
-                                     vision=self._config['vision'],
-                                     bias=self._config['bias'],
-                                     bias_init=self._config['bias_init'],
-                                     output_init=self._config['output_init'],
-                                     hidden_init=self._config['hidden_init'],
-                                     output_act=self._config['output_act'],
-                                     hidden_act=self._config['hidden_act'])
-            if self._prev_population is not None:
-                pop = {}
-                limit = (len(self._prev_population) if len(self._prev_population) <= self._config['population'] else
-                         self._config['population'])
-                for i in range(1, limit + 1):
-                    pop[i] = self._prev_population[i]
-                self._batch.update_brains(pop)
-            # Create GA instance
-            self._ga = GA(selection=self._config['selection'],
-                          selection_params={self._ga_map.params_name[self._config['selection']]:
-                                            self._config['selection_param'][0]}
-                          if self._config['selection_param'][1] == 'normal' else {},
-                          fitness='fitness1',
-                          crossover=self._config['crossover'],
-                          crossover_params={self._ga_map.params_name[self._config['crossover']]:
-                                            self._config['crossover_param'][0]}
-                          if self._config['crossover_param'][1] == 'normal' else {},
-                          crossover_rate=self._config['crossover_rate'],
-                          mutation=self._config['mutation'],
-                          mutations_params={self._ga_map.params_name[self._config['mutation']]:
-                                            self._config['mutation_param'][0]}
-                          if self._config['mutation_param'][1] == 'normal' else {},
-                          mutation_rate=self._config['mutation_rate'],
-                          offspring=self._config['population'] if self._config['replacement'] == 'generational'
-                          else self._config['offspring']
-                          )
+            self._worker.init(self._config, self._prev_population)
         # Update UI
         self._start_stop_button.configure(state='disabled')
         self._pgr_state.configure(text=f'Status: Initializing,     '
@@ -647,102 +635,29 @@ class TrainingWindow(WindowABC):
         thread.start()
         self._trace_init(thread)
 
-    def _refresh_gui(self) -> None:
+    def _refresh_gui(self, hola) -> None:
         """
         Refresh the GUI state after an iteration
         :return:
         """
         def work():
-            population, best, stats, fitness = self._data_queue.get()
-            self._batch.update_brains(population)
-            # Produce generation statistics
-            plot_data = Stats.generation_stats(stats, fitness, self._limit_score)
+            print('trabajando GUI desde ', hola)
+            plot_data = self._data_queue.get()
             # Update plots data
-            self._avg_fitness.append(plot_data[0])
-            self._avg_score.append(plot_data[1])
-            self._last_scores = plot_data[2]
-            self._avg_moves.append(plot_data[3])
-            self._avg_efficiency.append(plot_data[4])
+            self._avg_fitness.append(plot_data['fitness_avg'])
+            self._avg_score.append(plot_data['score_avg'])
+            self._last_scores = plot_data['scores']
+            self._avg_moves.append(plot_data['moves_avg'])
+            # self._avg_smoves.append(plot_data['smoves_avg'])
+            # self._avg_rmoves.append(plot_data['rmoves_avg'])
+            # self._avg_lmoves.append(plot_data['lmoves_avg'])
+            self._avg_efficiency.append(plot_data['efficiencies_avg'])
             # Update GUI stats
-            self._update_best(new_max_sc=plot_data[5])
-            self._update_progressbar(plot_data[6])
+            self._update_best(new_max_sc=plot_data['score_max'])
+            self._update_progressbar(plot_data['total_max_sc'])
             self._iterations.set(self._iterations.get() + 1)
             self._pgr_generation.configure(text=f'Generation: {self._iterations.get()}')
             self._pgr_best.configure(text=f'All Time Best Score: {self._best_score},'
-                                          f'    Current Best Score: {plot_data[5]}')
-            # Save current best and las population
-            try:
-                IO.save(Folders.models_folder, self._config['model'] + '.nn', self._batch.get_individual(best))
-                IO.save(Folders.populations_folder, self._config['model'] + '.pop', self._batch.population)
-            except:
-                pass
-
+                                          f'    Current Best Score: {plot_data["score_max"]}')
         thread = Thread(target=work)
         thread.start()
-
-
-class Stats:
-    """
-    Generates the plotting data from populations metrics
-    """
-    @staticmethod
-    def generation_stats(population_stats: list[tuple[int, dict[str, float]]], fitness: dict[int, float],
-                         limit_score: int) -> tuple:
-        # Get all the values
-        scores = []
-        moves = []
-        turns = []
-        efficiencies = []
-        for i in population_stats:
-            moves.append(i[1]['moves'])
-            turns.append(i[1]['turns'])
-            scores.append(i[1]['score'])
-            efficiencies.append(i[1]['efficiency'])
-        # Calculate averages
-        fitness_avg = sum(list(fitness.values())) / len(fitness)
-        score_avg = sum(scores) / len(scores)
-        score_max = max(scores)
-        total_max_sc = scores.count(limit_score)
-        moves_avg = sum(moves) / len(moves)
-        efficiencies_avg = sum(efficiencies) / len(efficiencies)
-        return fitness_avg, score_avg, scores, moves_avg, efficiencies_avg, score_max, total_max_sc
-
-
-class Worker:
-    """
-    This class provides a pickable working class to be call inside the main class (which is not pickable) as a process
-    """
-    worker = 1
-    lock = Lock()
-
-    def __init__(self, flag_queue: Queue, data_queue: Queue,):
-        self._data = data_queue
-        self._flag = flag_queue
-
-    def _work(self, batch: SnakeBatch, ga: GA, data_queue: Queue, flag_queue: Queue) -> None:
-        """
-        Executes all the snake games and writes the results over a pipe
-        :param batch: snake batch object containing all game instances
-        :param ga: genetic algorithm instance object
-        :return:
-        """
-        # Run all snakes
-        population = batch.get_population_brains()
-        batch.run()
-        # Genetic process
-        stats = batch.results
-        best, fitness = ga.next_gen(population=population, scores=stats)
-        data_queue.put((population, best, stats, fitness))
-        flag_queue.put('ready')
-
-    def work(self, batch: SnakeBatch, ga: GA) -> None:
-        """
-        Main method wrapper to be called as a process
-        :param batch: snake batch object containing all game instances
-        :param ga: genetic algorithm instance object
-        :return:
-        """
-        with Worker.lock:
-            process = Process(target=self._work, args=(batch, ga, self._data, self._flag))
-            process.start()
-            process.join()
