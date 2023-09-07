@@ -9,6 +9,7 @@ from snake_ai.snake.game_process.snake_ai_gui_process import SnakeAIGUI
 from snake_ai.neural.nn_graphics import NNGraph
 from snake_ai.neural.nn import NN
 from snake_ai.data import Folders
+from multiprocessing import Lock
 from snake_ai.IO import IO
 import pygame
 
@@ -35,7 +36,7 @@ class GameModelDisplayer(GameDisplayerABC):
     """
 
     def __init__(self, size: tuple[int, int], speed: int, show_path: bool, graphics: str,
-                 brain: NN, vision: str, mediator=None, name: str = None, reload: bool = False):
+                 brain: NN, vision: str, mediator=None, name: str = None, reload=None):
         """
         Constructor
         :param size: grid game size
@@ -46,7 +47,7 @@ class GameModelDisplayer(GameDisplayerABC):
         :param vision: defines the data type of that is going to feed NN supported options[binary, real]
         :param name: used as flag and name file to produce output statistics
         :param mediator: app mediator instance
-        :param reload: flag to indicate if the model must be reloaded, used to update the training displayer
+        :param reload: multiprocessing.Lock to protect the model file at disc
         """
         super().__init__(show_path)
         super().init_pygame(SCREEN)
@@ -152,9 +153,10 @@ class GameModelDisplayer(GameDisplayerABC):
         Resets the state of the game
         :return:
         """
-        if self._games == 5 and self._reload:
+        if self._games == 5 and self._reload is not None:
             self._games = 0
-            new_model = self._mediator.reload_model()
+            with self._reload:
+                new_model = self._mediator.reload_model()
             self._model = new_model if isinstance(new_model, NN) else self._model
         self._ai = SnakeAIGUI(size=self._size, core=self._graphics, show_path=self._a_star, brain=self._model,
                               vision=self._vision, mode='autoP')
@@ -200,7 +202,7 @@ class GameModelDisplayer(GameDisplayerABC):
                     pygame.display.flip()
                     clock.tick(self._speed)
                 else:
-                    if self._reload:
+                    if self._reload is not None:
                         self._games += 1
                     self._stats_board(True)
                     self._reset()

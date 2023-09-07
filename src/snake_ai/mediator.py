@@ -7,13 +7,14 @@
 
 from snake_ai.snake.game_displayer.game_vsai_displayer import GameVSAIDisplayer
 from snake_ai.snake.game_displayer.game_model_displayer import GameModelDisplayer
-from snake_ai.gui.training_win import TrainingWindow
 from snake_ai.gui.training_config_win import TrainingConfigWindow
 from snake_ai.gui.game_config_win import GameConfigWindow
 from snake_ai.gui.main_menu_win import MainMenuWindow
+from snake_ai.gui.training_win import TrainingWindow
 from snake_ai.gui.start_win import StartWindow
 from snake_ai.gui.stats_win import StatsWindow
 from snake_ai.neural.nn import NN
+from multiprocessing import Lock
 import customtkinter as ctk
 from snake_ai.IO import IO
 import os
@@ -102,7 +103,7 @@ class APPMediator:
             return model
 
     def display_training(self, game_size: tuple[int, int], game_speed: int, show_path: bool, graphics: str,
-                         brain_path: str) -> None:
+                         brain_path: str, lock: Lock) -> None:
         """
         Creates and runs a snake AI controlled game from the training window process
         :param game_size: grid size
@@ -110,13 +111,15 @@ class APPMediator:
         :param show_path: flag to control the displaying of A* path
         :param graphics: game graphics flavor
         :param brain_path: game controller path
+        :param lock: lock used to avoid racing conditions while reading the models
         :return:
         """
-        model = self._check_model(brain_path)
+        with lock:
+            model = self._check_model(brain_path)
         if isinstance(model, tuple):
             self._running_model = brain_path
             game = GameModelDisplayer(size=(game_size[0], game_size[1]), speed=game_speed, show_path=show_path,
-                                      graphics=graphics, brain=model[1], vision=model[0], mediator=self, reload=True)
+                                      graphics=graphics, brain=model[1], vision=model[0], mediator=self, reload=lock)
             game.force_init()
             game.run()
             self._running_model = None

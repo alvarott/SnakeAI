@@ -5,12 +5,12 @@
 # Version: 0.0.1
 
 from snake_ai.gui.panels import IOFile, SegmentedPanel
-from snake_ai.gui.abc_win import WindowABC
 from snake_ai.snake.enums import GameSize, GameSpeed
-import customtkinter as ctk
-from tkinter import messagebox
-import os
+from snake_ai.gui.abc_win import WindowABC
 from snake_ai.data import Folders
+from tkinter import messagebox
+import customtkinter as ctk
+import os
 
 
 class GameConfigWindow(WindowABC):

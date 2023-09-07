@@ -97,7 +97,7 @@ class TrainingConfigWindow(WindowABC):
             # Widgets
             self._model_w = TextEntry(master=self, label=self._model_lb)
             self._gsize_w = DropDownPanel(master=self, options=list(self._general_data.training_grid_size.keys()))
-            self._cpu_w = NumericEntry(master=self, from_=1, to=os.cpu_count() - 3, step=1, type='int',
+            self._cpu_w = NumericEntry(master=self, from_=1, to=os.cpu_count() - 2, step=1, type='int',
                                        label=self._cpu_lb)
             self._vision_w = DropDownPanel(master=self, options=self._general_data.vision)
             self._previous_bool_w = ctk.BooleanVar(value=False)
