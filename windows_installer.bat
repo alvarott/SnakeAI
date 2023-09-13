@@ -83,7 +83,7 @@ echo.
 mkdir "!env_dir!"
 !python_path! -m venv "!env_dir!"
 call "!env_dir!\Scripts\activate"
-pip install "!directory!\dist\snakeAI-0.0.1-py3-none-any.whl"
+pip install "!directory!\dist\snakeAI-0.0.1-cp311-cp311-win_amd64.whl"
 echo.
 echo INFO: Python environment created
 
