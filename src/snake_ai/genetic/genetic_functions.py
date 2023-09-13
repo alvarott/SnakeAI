@@ -43,10 +43,10 @@ class _Fitness:
             if lmoves == 0 and rmoves == 0:
                 penalty = 0
             elif (max_score * 0.1) < score <= (max_score * 0.4):
-                if lmoves == 0 or rmoves == 0:
-                    penalty = 0.2
+                if min(lmoves, rmoves) / max(lmoves, rmoves) > 0.8:
+                    penalty = 0.3
                 elif min(lmoves, rmoves) / max(lmoves, rmoves) > 0.6:
-                    penalty = 0.8
+                    penalty = 0.6
                 else:
                     penalty = 1
             elif (max_score * 0.4) < score:
