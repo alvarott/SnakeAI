@@ -56,18 +56,17 @@ class APPMediator:
         self._main_menu_win.center_to_current('topleft', current_win)
         self._win_transition(current_win=current_win, next_win=self._main_menu_win.window)
 
-    def back_to_training_config(self, current_win: ctk.CTk, destroy: bool) -> None:
+    def back_to_training_config(self, current_win: ctk.CTk) -> None:
         """
         Hides the current window and pops out the training configuration window,
         the current window can be also destroyed
         :param current_win: current opened window instance
-        :param destroy: boolean flag to indicate if the current window has to be destroyed
         :return:
         """
+        del self._training_win
+        self._training_win = None
+        self._training_conf_win.clean()
         self._win_transition(current_win=current_win, next_win=self._training_conf_win.window)
-        if destroy:
-            del self._training_win
-            self._training_win = None
 
     def main_to_vsai(self) -> None:
         """
@@ -207,7 +206,7 @@ class APPMediator:
         """
         self._start_win.window.destroy()
 
-    def _win_transition(self, current_win: ctk.CTk, next_win: ctk.CTk, step: float = 0.00008) -> None:
+    def _win_transition(self, current_win: ctk.CTk, next_win: ctk.CTk, step: float = 0.0005) -> None:
         """
         Auxiliary method to transitioning between windows
         :param current_win: current window instance to hide

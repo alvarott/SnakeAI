@@ -49,6 +49,14 @@ class TrainingConfigWindow(WindowABC):
         self._back_button.place(x=50, y=365)
         self._next_button.place(x=175, y=365)
 
+    def clean(self) -> None:
+        """
+        If the training is stopped to tune some of the parameters it sets the selected previous population as the one
+        under training
+        :return:
+        """
+        self._subframes.set_population()
+
     def _next_behavior(self) -> None:
         """
         Next button behavior
@@ -139,6 +147,15 @@ class TrainingConfigWindow(WindowABC):
             self._cwidgets_g1.append(self._vision_w)
             self._flip_widgets(self._cwidgets_g2, True)
             self._dialog_w.file_var.trace('w', self._set_prev_population)
+
+        def set_population(self) -> None:
+            """
+            Resets the selected population
+            :return:
+            """
+            self._dialog_w.file_var.set('')
+            self._previous_w.deselect()
+            self._check_behavior()
 
         def _check_behavior(self) -> None:
             """
@@ -299,12 +316,12 @@ class TrainingConfigWindow(WindowABC):
             self._font = ctk.CTkFont(family='console', size=13)
             # Labels
             self._hiddenl_lb = ctk.CTkLabel(master=self, text="  Hidden Layers", font=self._font)
-            self._hiddeni_lb = ctk.CTkLabel(master=self, text="  Hidden initialization", font=self._font)
-            self._hiddena_lb = ctk.CTkLabel(master=self, text="  Hidden activation", font=self._font)
-            self._outputi_lb = ctk.CTkLabel(master=self, text="  Output initialization", font=self._font)
-            self._outputa_lb = ctk.CTkLabel(master=self, text="  Output activation", font=self._font)
+            self._hiddeni_lb = ctk.CTkLabel(master=self, text="  Hidden Initialization", font=self._font)
+            self._hiddena_lb = ctk.CTkLabel(master=self, text="  Hidden Activation", font=self._font)
+            self._outputi_lb = ctk.CTkLabel(master=self, text="  Output Initialization", font=self._font)
+            self._outputa_lb = ctk.CTkLabel(master=self, text="  Output Activation", font=self._font)
             self._bias_lb = ctk.CTkLabel(master=self, text="  Bias", font=self._font)
-            self._biasi_lb = ctk.CTkLabel(master=self, text="  Bias initialization", font=self._font)
+            self._biasi_lb = ctk.CTkLabel(master=self, text="  Bias Initialization", font=self._font)
             # Widgets
             self._hiddenl_w = ArrayEntry(master=self, label=self._hiddenl_lb)
             self._hiddeni_w = DropDownPanel(master=self, options=self._neural_data.hidden_init)
