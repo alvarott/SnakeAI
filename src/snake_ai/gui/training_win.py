@@ -92,9 +92,6 @@ class TrainingWindow(WindowABC):
         self._avg_fitness = []
         self._avg_score = []
         self._avg_moves = []
-        self._avg_smoves = []
-        self._avg_rmoves = []
-        self._avg_lmoves = []
         self._last_scores = []
         self._avg_efficiency = []
 
@@ -205,7 +202,7 @@ class TrainingWindow(WindowABC):
 
         # Progress labels
         self._pgr_state = ctk.CTkLabel(master=self._prg_frame,
-                                       text='Status: not initialized,     Elapsed Time: 00:00:00.000',
+                                       text='Status: not initialized,     Elapsed Time: 00:00:00.00',
                                        font=self._font13b)
         self._pgr_best = ctk.CTkLabel(master=self._prg_frame, text=f'All Time Best Score: 0,    Current Best Score: 0',
                                       font=self._font13b)
@@ -344,7 +341,6 @@ class TrainingWindow(WindowABC):
         :return:
         """
         def work():
-            t = time()
             # Clean plots
             self._moves_plot.clear()
             self._score_plot.clear()
@@ -356,22 +352,15 @@ class TrainingWindow(WindowABC):
             if len(self._avg_moves) > 10000:
                 self._avg_score = self._avg_score[1:]
                 self._avg_moves = self._avg_moves[1:]
-#                 # self._avg_smoves = self._avg_moves[1:]
-#                 # self._avg_rmoves = self._avg_moves[1:]
-#                 # self._avg_lmoves = self._avg_moves[1:]
                 self._avg_efficiency = self._avg_efficiency[1:]
                 self._avg_fitness = self._avg_fitness[1:]
 
             # Update plots
             x = [i for i in range(1, len(self._avg_score) + 1)]
             self._moves_plot.plot(x, self._avg_moves)
-            # self._moves_plot.plot(x, self._avg_smoves, label='straight')
-            # self._moves_plot.plot(x, self._avg_rmoves, label='right')
-            # self._moves_plot.plot(x, self._avg_lmoves, label='left')
-            # self._moves_plot.legend()
             self._score_plot.plot(x, self._avg_score)
             self._efficiency_plot.plot(x, self._avg_efficiency)
-            self._scores_plot.hist(self._last_scores, bins=15 , edgecolor='black')
+            self._scores_plot.hist(self._last_scores, bins=15, edgecolor='black')
             self._fitness_plot.plot(x, self._avg_fitness)
 
             # Titles
@@ -388,10 +377,8 @@ class TrainingWindow(WindowABC):
             self._scores_hist_canvas.draw()
             self._fitness_canvas.draw()
 
-            print('worker liberado')
             # Synchronize with child process
             self._sync_event.set()
-            print(timedelta(seconds=time() - t))
             self._trace_queue()
 
         thread = Thread(target=work)
@@ -478,10 +465,8 @@ class TrainingWindow(WindowABC):
         if self._displaying.get():
             messagebox.showerror(title='Processes Running', message='Pleased stop all running processes before closing',
                                  parent=self.window)
-        elif self._iterations.get() == 0:
-            self._mediator.back_to_training_config(self.window, False)
         else:
-            self._mediator.back_to_training_config(self.window, True)
+            self._mediator.back_to_training_config(self.window)
 
     def _display_behavior(self) -> None:
         """
@@ -504,7 +489,6 @@ class TrainingWindow(WindowABC):
     def _trace_queue(self) -> None:
         """
         Controls the waiting loop while the working child process writes data to consume over the pipe
-        :param active: flag to continue or stop the tracing
         :return:
         """
         self.window.after(500, self._check_queue)
@@ -519,12 +503,12 @@ class TrainingWindow(WindowABC):
             if self._data_queue.empty():
                 self._trace_queue()
             else:
-                self._refresh_gui('activo')
+                self._refresh_gui()
         else:
             if self._worker_state.value == b'wr':
                 self._trace_queue()
             elif self._worker_state.value == b'wt':
-                self._refresh_gui('parado')
+                self._refresh_gui()
             else:
                 if self._done_queue.empty() and self._running.get():
                     self._trace_queue()
@@ -589,7 +573,6 @@ class TrainingWindow(WindowABC):
         """
         Updates the best recorded individual score and fitness
         :param new_max_sc: last generation maximal score
-        :param new_max_fit: last generation maximal fitness
         :return:
         """
         self._best_score = self._best_score if self._best_score > new_max_sc else new_max_sc
@@ -635,22 +618,18 @@ class TrainingWindow(WindowABC):
         thread.start()
         self._trace_init(thread)
 
-    def _refresh_gui(self, hola) -> None:
+    def _refresh_gui(self) -> None:
         """
         Refresh the GUI state after an iteration
         :return:
         """
         def work():
-            print('trabajando GUI desde ', hola)
             plot_data = self._data_queue.get()
             # Update plots data
             self._avg_fitness.append(plot_data['fitness_avg'])
             self._avg_score.append(plot_data['score_avg'])
             self._last_scores = plot_data['scores']
             self._avg_moves.append(plot_data['moves_avg'])
-            # self._avg_smoves.append(plot_data['smoves_avg'])
-            # self._avg_rmoves.append(plot_data['rmoves_avg'])
-            # self._avg_lmoves.append(plot_data['lmoves_avg'])
             self._avg_efficiency.append(plot_data['efficiencies_avg'])
             # Update GUI stats
             self._update_best(new_max_sc=plot_data['score_max'])

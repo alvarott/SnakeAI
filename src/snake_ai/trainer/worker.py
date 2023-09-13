@@ -25,7 +25,6 @@ class Worker:
         :param sync: event used for synchronization with the mainloop
         :param file_lock: locker to avoid racing conditions with the game-displayer over the model file
         :param worker_state: flag to know the current worker status and help with synchronization
-        @TODO clean the tracing prints
         """
         self._batch: SnakeBatch | None = None
         self._ga: GA | None = None
@@ -111,7 +110,6 @@ class Worker:
         """
         counter = 1
         while alive.value:
-            print(f'Generation {counter}')
             state.value = b'wr'
             # Run the games
             population = batch.get_population_brains()
@@ -130,10 +128,8 @@ class Worker:
             # Pass execution stats to main process
             data_queue.put(stats_producer.generation_stats(stats, fitness))
             # Synchronize with the main process
-            print(f'Generation {counter} waiting for event')
             state.value = b'wt'
             if event.wait(120):
-                print(f'Generation {counter} event received')
                 event.clear()
                 counter += 1
             else:
@@ -141,7 +137,6 @@ class Worker:
         else:
             state.value = b'sv'
             # Send the current population status to the parent process
-            print(f'passing batch to parent')
             termination_queue.put(batch.get_population_brains())
 
     def train(self):
