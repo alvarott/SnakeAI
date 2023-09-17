@@ -40,7 +40,7 @@ class _Fitness:
             :return fitness:  fitness value
             """
             penalty = 0.5
-            if lmoves == 0 and rmoves == 0:
+            if lmoves == 0 or rmoves == 0:
                 penalty = 0
             elif (max_score * 0.1) < score <= (max_score * 0.4):
                 if min(lmoves, rmoves) / max(lmoves, rmoves) > 0.8:
