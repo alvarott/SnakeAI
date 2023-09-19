@@ -14,7 +14,6 @@ from snake_ai.gui.training_win import TrainingWindow
 from snake_ai.gui.start_win import StartWindow
 from snake_ai.gui.stats_win import StatsWindow
 from snake_ai.neural.nn import NN
-from multiprocessing import Lock
 import customtkinter as ctk
 from snake_ai.IO import IO
 import os
@@ -32,7 +31,6 @@ class APPMediator:
         self._training_conf_win = None
         self._training_win = None
         self._stats_win = None
-        self._running_model = None
 
     def start(self) -> None:
         """
@@ -102,7 +100,7 @@ class APPMediator:
             return model
 
     def display_training(self, game_size: tuple[int, int], game_speed: int, show_path: bool, graphics: str,
-                         brain_path: str, lock: Lock) -> None:
+                         brain_path: str) -> None | str:
         """
         Creates and runs a snake AI controlled game from the training window process
         :param game_size: grid size
@@ -110,18 +108,17 @@ class APPMediator:
         :param show_path: flag to control the displaying of A* path
         :param graphics: game graphics flavor
         :param brain_path: game controller path
-        :param lock: lock used to avoid racing conditions while reading the models
         :return:
         """
-        with lock:
-            model = self._check_model(brain_path)
+        model = self._check_model(brain_path)
         if isinstance(model, tuple):
-            self._running_model = brain_path
             game = GameModelDisplayer(size=(game_size[0], game_size[1]), speed=game_speed, show_path=show_path,
-                                      graphics=graphics, brain=model[1], vision=model[0], mediator=self, reload=lock)
+                                      graphics=graphics, brain=model[1], vision=model[0], mediator=self)
             game.force_init()
             game.run()
-            self._running_model = None
+            return
+        else:
+            return model
 
     def main_to_try_model(self) -> None:
         """
@@ -188,16 +185,6 @@ class APPMediator:
         else:
             self._stats_win.center_to_current('topleft', self._main_menu_win.window)
         self._win_transition(current_win=self._main_menu_win.window, next_win=self._stats_win.window)
-
-    def reload_model(self):
-        """
-        Loads the current model under training
-        :return:
-        """
-        if self._running_model is not None:
-            model = self._check_model(self._running_model)
-            return model[1]
-        return None
 
     def exit(self) -> None:
         """

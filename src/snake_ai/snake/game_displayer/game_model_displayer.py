@@ -9,7 +9,6 @@ from snake_ai.snake.game_process.snake_ai_gui_process import SnakeAIGUI
 from snake_ai.neural.nn_graphics import NNGraph
 from snake_ai.neural.nn import NN
 from snake_ai.data import Folders
-from multiprocessing import Lock
 from snake_ai.IO import IO
 import pygame
 
@@ -36,7 +35,7 @@ class GameModelDisplayer(GameDisplayerABC):
     """
 
     def __init__(self, size: tuple[int, int], speed: int, show_path: bool, graphics: str,
-                 brain: NN, vision: str, mediator=None, name: str = None, reload=None):
+                 brain: NN, vision: str, mediator=None, name: str = None):
         """
         Constructor
         :param size: grid game size
@@ -47,7 +46,6 @@ class GameModelDisplayer(GameDisplayerABC):
         :param vision: defines the data type of that is going to feed NN supported options[binary, real]
         :param name: used as flag and name file to produce output statistics
         :param mediator: app mediator instance
-        :param reload: multiprocessing.Lock to protect the model file at disc
         """
         super().__init__(show_path)
         super().init_pygame(SCREEN)
@@ -67,8 +65,6 @@ class GameModelDisplayer(GameDisplayerABC):
         self._output_lb = ["left", "straight", "right"]
         self._max_score = size[0] * size[1] - 3
         self._mediator = mediator
-        self._reload = reload
-        self._games = 0
         self._ai = SnakeAIGUI(size=(size[0], size[1]), core=graphics, show_path=show_path, brain=self._model,
                               vision=vision, mode='autoP')
         self._nn_graph = NNGraph(self._ai.controller.layers, self._input_lb, self._output_lb)
@@ -153,11 +149,6 @@ class GameModelDisplayer(GameDisplayerABC):
         Resets the state of the game
         :return:
         """
-        if self._games == 5 and self._reload is not None:
-            self._games = 0
-            with self._reload:
-                new_model = self._mediator.reload_model()
-            self._model = new_model if isinstance(new_model, NN) else self._model
         self._ai = SnakeAIGUI(size=self._size, core=self._graphics, show_path=self._a_star, brain=self._model,
                               vision=self._vision, mode='autoP')
 
@@ -202,8 +193,6 @@ class GameModelDisplayer(GameDisplayerABC):
                     pygame.display.flip()
                     clock.tick(self._speed)
                 else:
-                    if self._reload is not None:
-                        self._games += 1
                     self._stats_board(True)
                     self._reset()
         # Save statistics

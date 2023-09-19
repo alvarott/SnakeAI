@@ -6,7 +6,7 @@
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from multiprocessing.sharedctypes import Value, Array
-from multiprocessing import Queue, Event, Lock
+from multiprocessing import Queue, Event
 from snake_ai.gui._data import Colors, GAShortNames
 from snake_ai.gui.panels import ProgressBar
 from snake_ai.gui.abc_win import WindowABC
@@ -54,10 +54,9 @@ class TrainingWindow(WindowABC):
         self._done_queue = Queue()
         self._training_flag = Value('i', 0)
         self._worker_state = Array('c', b'cr')
-        self._file_lock = Lock()
         self._sync_event = Event()
         self._worker = Worker(loop_flag=self._training_flag, data_queue=self._data_queue,
-                              termination_queue=self._done_queue, sync=self._sync_event, file_lock=self._file_lock,
+                              termination_queue=self._done_queue, sync=self._sync_event,
                               worker_state=self._worker_state)
 
         # Master Frames
@@ -321,21 +320,10 @@ class TrainingWindow(WindowABC):
         # Traces
         self._running.trace('w', self._set_stopped)
         self._displaying.trace('w', self._set_displaying)
-        self._iterations.trace('w', self._plotting)
+        self._iterations.trace('w', self._update_plots)
         self._update_time.trace('w', self._timer)
 
-    def _plotting(self, *args) -> None:
-        """
-        Plots the data after each training iteration and unlocks the model display button
-        :param args:
-        :return:
-        """
-        if self._block_display:
-            self._display_button.configure(state='normal')
-            self._block_display = False
-        self._update_plots()
-
-    def _update_plots(self) -> None:
+    def _update_plots(self, *args) -> None:
         """
         Updates all the plots with the available collected data
         :return:
@@ -443,8 +431,10 @@ class TrainingWindow(WindowABC):
         """
         if self._display_button.cget('state') == 'normal':
             self._display_button.configure(state='disabled')
+            self._start_stop_button.configure(state='disabled')
         else:
             self._display_button.configure(state='normal')
+            self._start_stop_button.configure(state='normal')
 
     def _set_stopped(self, *args) -> None:
         """
@@ -474,13 +464,16 @@ class TrainingWindow(WindowABC):
         """
         def display():
             self._displaying.set(True)
-            self._mediator.display_training(game_size=self._config['game_size'],
-                                            game_speed=25,
-                                            show_path=False,
-                                            graphics='SnakeHWGUI',
-                                            lock=self._file_lock,
-                                            brain_path=os.path.join(Folders.models_folder,
-                                                                    self._config['model'] + '.nn'))
+            state = self._mediator.display_training(game_size=self._config['game_size'],
+                                                    game_speed=25,
+                                                    show_path=False,
+                                                    graphics='SnakeHWGUI',
+                                                    brain_path=os.path.join(Folders.models_folder,
+                                                                            self._config['model'] + '.nn'))
+            if state is not None:
+                messagebox.showerror('Could not open Model',
+                                     'The file could not be opened it may be corrupted, run training to overwrite it',
+                                     parent=self.window)
             self._displaying.set(False)
 
         thread = Thread(target=display)
@@ -515,6 +508,7 @@ class TrainingWindow(WindowABC):
                 else:
                     self._running.set(False)
                     self._worker.batch.update_brains(self._done_queue.get())
+                    self._display_button.configure(state='normal')
 
     def _trace_start(self, thread: Thread):
         """
@@ -539,6 +533,7 @@ class TrainingWindow(WindowABC):
         self._update_time.set(True)
         self._started = True
         self._running.set(True)
+        self._display_button.configure(state='disabled')
         # Spawn child process using a thread to decrease freezing from GUI
         self._training_flag.value = 1
         thread = Thread(target=self._worker.train)

@@ -5,7 +5,7 @@
 # Version: 0.0.1
 
 from snake_ai.snake.game_process.snake_batch_process import SnakeBatch
-from multiprocessing import Queue, Event, Lock, Process
+from multiprocessing import Queue, Event, Process
 from multiprocessing.sharedctypes import Value, Array
 from snake_ai.genetic.genetic_algorithm import GA
 from snake_ai.gui._data import GeneticConfig
@@ -15,7 +15,7 @@ from snake_ai.IO import IO
 
 
 class Worker:
-    def __init__(self, loop_flag: Value, data_queue: Queue, termination_queue: Queue, sync: Event, file_lock: Lock,
+    def __init__(self, loop_flag: Value, data_queue: Queue, termination_queue: Queue, sync: Event,
                  worker_state: Array):
         """
         Constructor
@@ -23,7 +23,6 @@ class Worker:
         :param data_queue: queue where to put the produced data to be consumed for the mainloop
         :param termination_queue: queue to notify that the process has finished
         :param sync: event used for synchronization with the mainloop
-        :param file_lock: locker to avoid racing conditions with the game-displayer over the model file
         :param worker_state: flag to know the current worker status and help with synchronization
         """
         self._batch: SnakeBatch | None = None
@@ -35,7 +34,6 @@ class Worker:
         self._data_queue = data_queue
         self._done_queue = termination_queue
         self._event = sync
-        self._lock = file_lock
         self._worker_state = worker_state
 
     @property
@@ -95,7 +93,7 @@ class Worker:
 
     @staticmethod
     def _work(model_name: str, batch: SnakeBatch, ga: GA, alive: Value, data_queue: Queue, termination_queue: Queue,
-              event: Event, lock: Lock, stats_producer: Stats, state: Array) -> None:
+              event: Event, stats_producer: Stats, state: Array) -> None:
         """
         Runs a loop training the models while 'alive' flag is activated
         :param model_name: name that is going to be used to save the model at disc
@@ -103,12 +101,10 @@ class Worker:
         :param data_queue: queue where to put the produced data to be consumed for the mainloop
         :param termination_queue: queue to notify that the process has finished
         :param event: event used for synchronization with the mainloop
-        :param lock: locker to avoid racing conditions with the game-displayer over the model file
         :params stats_producer: stats producer object
         :params state: flag to describe the worker state
         :return:
         """
-        counter = 1
         while alive.value:
             state.value = b'wr'
             # Run the games
@@ -119,19 +115,17 @@ class Worker:
             best, fitness = ga.next_gen(population=population, scores=stats)
             batch.update_brains(population)
             # Save current best and las population
-            with lock:
-                try:
-                    IO.save(Folders.models_folder, model_name + '.nn', batch.get_individual(best))
-                    IO.save(Folders.populations_folder, model_name + '.pop', batch.population)
-                except:
-                    pass
+            try:
+                IO.save(Folders.models_folder, model_name + '.nn', batch.get_individual(best))
+                IO.save(Folders.populations_folder, model_name + '.pop', batch.population)
+            except:
+                pass
             # Pass execution stats to main process
             data_queue.put(stats_producer.generation_stats(stats, fitness))
             # Synchronize with the main process
             state.value = b'wt'
             if event.wait(120):
                 event.clear()
-                counter += 1
             else:
                 break
         else:
@@ -145,6 +139,10 @@ class Worker:
         :return:
         """
         process = Process(target=Worker._work, args=(self._model_name, self._batch, self._ga, self._loop_flag,
-                                                     self._data_queue, self._done_queue, self._event, self._lock,
+                                                     self._data_queue, self._done_queue, self._event,
                                                      self._stats_producer, self._worker_state))
         process.start()
+
+
+
+# Fixed mainthread overload, causing app to fail, training and displaying simultaneously is no loger possible"
