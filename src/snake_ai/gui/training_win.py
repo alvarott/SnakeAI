@@ -5,8 +5,7 @@
 # Version: 0.0.1
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from multiprocessing.sharedctypes import Value, Array
-from multiprocessing import Queue, Event
+from multiprocessing import Queue, Event, Value, Array
 from snake_ai.gui._data import Colors, GAShortNames
 from snake_ai.gui.panels import ProgressBar
 from snake_ai.gui.abc_win import WindowABC

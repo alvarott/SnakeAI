@@ -5,8 +5,7 @@
 # Version: 0.0.1
 
 from snake_ai.snake.game_process.snake_batch_process import SnakeBatch
-from multiprocessing import Queue, Event, Process
-from multiprocessing.sharedctypes import Value, Array
+from multiprocessing import Queue, Event, Process, Value, Array
 from snake_ai.genetic.genetic_algorithm import GA
 from snake_ai.gui._data import GeneticConfig
 from snake_ai.data import Folders
