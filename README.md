@@ -45,11 +45,22 @@ Previous to lauch a model traning we will be prompted with a configuration windo
 ### General
 Under this tab we will configure general settings:
 
- - **Model Name          :** Model's name
+ - **Model name          :** Model's name
  - **Game size           :** Grid size
- - **Cpu Cores           :** Logic cpu's cores to use during training
+ - **Cpu cores           :** Logic cpu's cores to use during training
  - **Vision              :** Numeric representation of distances to feed the model (binary or real)
  - **Previous population :** This option unlocks the possibility of selecting an existing population and continous its training
+
+### Neural Network
+The next parameters of a dense neural network are configurable:
+
+- **Hidden layers :** : List of comma separated integer values (index = layer, value = number of nodes)(e.i [40, 40] two layers of 40 nodes each)
+- **Hidden initialization :** Hidden layers initilization function
+- **Hidden activation :** Hidden layers activation function
+- **Output initilization :** Output layer initialization function
+- **Output activation :** Output layer activation function
+- **Bias :** Include bias vector
+- **Bias initialization :** Bias vector initialization 
 
 ## Dependencies
 This project make use of the following third-party libraries:
