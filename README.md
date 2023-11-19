@@ -42,6 +42,12 @@ Previous to lauch a model traning we will be prompted with a configuration windo
 - Neural Network
 - Genetic Algorithm
 
+<br>
+
+https://github.com/alvarott/SnakeAI/assets/129681739/88b15aaf-9d77-438f-b2db-34351da71600
+
+<br>
+
 ### General
 Under this tab we will configure general settings:
 
@@ -49,18 +55,38 @@ Under this tab we will configure general settings:
  - **Game size           :** Grid size
  - **Cpu cores           :** Logic cpu's cores to use during training
  - **Vision              :** Numeric representation of distances to feed the model (binary or real)
- - **Previous population :** This option unlocks the possibility of selecting an existing population and continous its training
+ - **Previous population :** This option unlocks the possibility of selecting an existing population and continue its training, during every iteration of the training the best individual(model) and the current population it is saved to disk under the path **<installation_folder>/SnakeAI_data/**
 
 ### Neural Network
 The next parameters of a dense neural network are configurable:
 
-- **Hidden layers :** : List of comma separated integer values (index = layer, value = number of nodes)(e.i [40, 40] two layers of 40 nodes each)
+- **Hidden layers :**  List of comma separated integer values (index = layer, value = number of nodes)(e.i [40, 40] two layers of 40 nodes each)
 - **Hidden initialization :** Hidden layers initilization function
 - **Hidden activation :** Hidden layers activation function
 - **Output initilization :** Output layer initialization function
 - **Output activation :** Output layer activation function
 - **Bias :** Include bias vector
-- **Bias initialization :** Bias vector initialization 
+- **Bias initialization :** Bias vector initialization
+
+### Genetic Algorithm
+The app implements a classic genetic algorithm, the following parameters are configurable:
+
+- **Population :** Number of individuals
+- **Selection :** Selection method during evolution process
+- **Crossover:** Crossover method (specific parameters of the method are also configurable i.e crossover_rate)
+- **Mutation:** Mutation method (currently just Gaussian implemented)
+- **Replacement:** Population replacement method
+
+<br>
+
+## Train Model
+During the training we can monitor the advance of the process with data represented over plots as population average score, population average fitness among others. It is also possible to stop the training and check how the model is performing launching the game.
+
+<br>
+
+https://github.com/alvarott/SnakeAI/assets/129681739/a0543962-2e1a-4fdf-985d-a0715f85ae6f
+
+<br>
 
 ## Dependencies
 This project make use of the following third-party libraries:
