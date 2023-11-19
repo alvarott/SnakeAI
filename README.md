@@ -98,7 +98,7 @@ https://github.com/alvarott/SnakeAI/assets/129681739/1be16372-c352-4781-acea-f95
 <br>
 
 ## Installation
-The app can be build with all its resources using the current **"setup.cfg"**, once is packaged and installed in a virtual environment it can be started calling **"python -m snake_ai.main"**
+The app can be build with all its resources using the current **"setup.cfg"**. Once is packaged and installed in a virtual environment it can be started calling **"python -m snake_ai.main"**
 
 It can also be installed downloading the folder **SnakeAI_installer** and executing the file **"windows_installer.bat"** (Python >= 3.11.* and internet conexion is required to automatically install dependencies using pip).
 
