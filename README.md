@@ -104,6 +104,8 @@ It can also be installed downloading the folder **SnakeAI_installer** and execut
 
 When the installation is completed, the installation folder will be allocated at the same folder where the file **"windows_installer.bat"** was. At this path we will doble-click to the file **"./SnakeAI/SnakeAI.vbs"** to start the app.
 
+<br>
+
 ## Dependencies
 This project make use of the following third-party libraries:
 
