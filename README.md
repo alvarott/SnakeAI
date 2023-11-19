@@ -88,6 +88,9 @@ https://github.com/alvarott/SnakeAI/assets/129681739/a0543962-2e1a-4fdf-985d-a07
 
 <br>
 
+## Statistics
+
+
 ## Dependencies
 This project make use of the following third-party libraries:
 
