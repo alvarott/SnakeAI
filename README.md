@@ -36,7 +36,7 @@ https://github.com/laguneroo/SnakeAI/assets/129681739/6405decc-d97f-45d0-9b55-1c
 <br>
 
 ## Train Model Configuration
-Prior to launching a model traning we will be prompted with a configuration window consisting in three tabs:
+Prior to launching a model training we will be prompted with a configuration window consisting of three tabs:
 
 - General
 - Neural Network
@@ -49,7 +49,7 @@ https://github.com/alvarott/SnakeAI/assets/129681739/88b15aaf-9d77-438f-b2db-343
 <br>
 
 ### General
-Under this tab we will configure general settings:
+Under this tab we configure general settings:
 
  - **Model name          :** Model's name
  - **Game size           :** Grid size
