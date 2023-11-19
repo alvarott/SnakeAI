@@ -9,6 +9,15 @@ The main functionality is:
 - Generate statistics over the different trained models and compare them graphically
 <br>
 
+## Dependencies
+This project make use of the following third-party libraries:
+
+- Numpy
+- Matplotlib
+- Pygame
+- Customtkinter
+<br>
+
 ## Main menu
 Once the app is started it will prompt the main manu, the different options correspond to those described above
 <br>
@@ -25,9 +34,11 @@ Once the app is started it will prompt the main manu, the different options corr
 Under this section we can play against one of the trained models, as well as configure some of the game setting as graphics interface, speed, grid size..
 
 https://github.com/laguneroo/SnakeAI/assets/129681739/1d25c24f-3924-43c3-a830-b9662670b3cc
+<br>
 
 ## Test Model
 In this section we can test our trained models and see the strongest activations over the neural network. During this execution the app produces son statistical data about the model that can be used to be compared with other models
 
 https://github.com/laguneroo/SnakeAI/assets/129681739/6405decc-d97f-45d0-9b55-1c6d864660ec
+<br>
 
