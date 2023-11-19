@@ -98,9 +98,12 @@ https://github.com/alvarott/SnakeAI/assets/129681739/1be16372-c352-4781-acea-f95
 <br>
 
 ## Installation
-The app can be build with all its resources using the current **setup.cgf**
+The app can be build with all its resources using the current **"setup.cfg"**, once is packaged and installed in a virtual environment it can be started calling **"python -m snake_ai.main"**
 
-It can also be installed downloading the folder **SnakeAI_installer** and executing the file **windows_installer.bat** (Python 3.
+It can also be installed downloading the folder **SnakeAI_installer** and executing the file **"windows_installer.bat"** (Python >= 3.11.* and internet conexion is required to automatically install dependencies using pip).
+
+When the installation is completed, the installation folder will be allocated at the same folder where the file **"windows_installer.bat"** was. At this path we will doble-click to the file **"./SnakeAI/SnakeAI.vbs"** to start the app.
+
 ## Dependencies
 This project make use of the following third-party libraries:
 
@@ -110,5 +113,17 @@ This project make use of the following third-party libraries:
 - Customtkinter
 <br>
 
+## Packing
+The app can be packed for example using **"pyinstaller"** runing the following commans:
 
+            
+            pyinstaller --name "SnakeAI" --noconfirm --onedir --windowed \
+            
+            --add-data "<path_to_customtkinter>/env_packing/Lib/site-packages/customtkinter;customtkinter/" \ 
+            
+            --add-data "<path_to_SnakeAI_source_code>/SnakeAI/src/snake_ai;snake_ai"  \
+            
+            --icon "<path_to_icon>/app_icon1.ico" \ 
+            
+            "<path_to_SnakeAI_main_module>/main.py"
 
