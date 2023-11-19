@@ -116,7 +116,7 @@ This project make use of the following third-party libraries:
 <br>
 
 ## Packing
-The app can be packed for example using **"pyinstaller"** runing the following commans:
+The app can be packed for example using **"pyinstaller"** runing the following commands:
 
             
             pyinstaller --name "SnakeAI" --noconfirm --onedir --windowed \
