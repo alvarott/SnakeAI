@@ -97,6 +97,10 @@ https://github.com/alvarott/SnakeAI/assets/129681739/1be16372-c352-4781-acea-f95
 
 <br>
 
+## Installation
+The app can be build with all its resources using the current **setup.cgf**
+
+It can also be installed downloading the folder **SnakeAI_installer** and executing the file **windows_installer.bat** (Python 3.
 ## Dependencies
 This project make use of the following third-party libraries:
 
@@ -105,4 +109,6 @@ This project make use of the following third-party libraries:
 - Pygame
 - Customtkinter
 <br>
+
+
 
