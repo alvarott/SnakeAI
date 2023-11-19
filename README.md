@@ -1,5 +1,5 @@
 # SnakeAI
-SnakeAI is a package developed to provide an interactive tool for training neural networks in mastering the Snake game, using a genetic algorithm for the training
+SnakeAI is a package developed to provide an interactive tool for training neural networks in mastering the Snake game, using a genetic algorithm for the training.
 
 The main functionality is:
 
@@ -10,7 +10,7 @@ The main functionality is:
 <br>
 
 ## Main menu
-Once the app is started it will prompt the main manu, the different options correspond to those described above
+Once the app is started it will prompt the main manu, the different options correspond to those described above.
 <br>
 <br>
 <p align="center">
@@ -29,11 +29,27 @@ https://github.com/laguneroo/SnakeAI/assets/129681739/1d25c24f-3924-43c3-a830-b9
 <br>
 
 ## Test Model
-In this section we can test our trained models and see the strongest activations over the neural network. During this execution the app produces son statistical data about the model that can be used to be compared with other models
+In this section we can test our trained models and see the strongest activations over the neural network. During this execution the app produces son statistical data about the model that can be used to be compared with other models.
 
 https://github.com/laguneroo/SnakeAI/assets/129681739/6405decc-d97f-45d0-9b55-1c6d864660ec
 
 <br>
+
+## Train Model Config
+Previous to lauch a model traning we will be prompted with a configuration window consisting in three tabs:
+
+- General
+- Neural Network
+- Genetic Algorithm
+
+### General
+Under this tab we will configure general settings:
+
+ - **Model Name          :** Model's name
+ - **Game size           :** Grid size
+ - **Cpu Cores           :** Logic cpu's cores to use during training
+ - **Vision              :** Numeric representation of distances to feed the model (binary or real)
+ - **Previous population :** This option unlocks the possibility of selecting an existing population and continous its training
 
 ## Dependencies
 This project make use of the following third-party libraries:
