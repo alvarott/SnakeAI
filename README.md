@@ -22,7 +22,12 @@ Once the app is started it will prompt the main manu, the different options corr
 <br> 
 
 ## Play vs AI
-Under this section we can play the game against one of the trained models, as well as configure some of the game setting as graphics interface, speed, grid size..
+Under this section we can play against one of the trained models, as well as configure some of the game setting as graphics interface, speed, grid size..
 
-https://github.com/laguneroo/SnakeAI/assets/129681739/591e8976-0392-4ea4-b659-fa40e9bf8167
+https://github.com/laguneroo/SnakeAI/assets/129681739/1d25c24f-3924-43c3-a830-b9662670b3cc
+
+## Test Model
+In this section we can test our trained models and see the strongest activations over the neural network. During this execution the app produces son statistical data about the model that can be used to be compared with other models
+
+https://github.com/laguneroo/SnakeAI/assets/129681739/6405decc-d97f-45d0-9b55-1c6d864660ec
 
