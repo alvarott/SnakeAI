@@ -55,7 +55,7 @@ Under this tab we configure general settings:
  - **Game size           :** Grid size
  - **Cpu cores           :** Logic cpu's cores to use during training
  - **Vision              :** Numeric representation of distances to feed the model (binary or real)
- - **Previous population :** This option unlocks the possibility of selecting an existing population and continue its training, during every iteration of the training the best individual(model) and the current population it is saved to disk under the path **<installation_folder>/SnakeAI_data/**
+ - **Previous population :** This option unlocks the possibility of selecting an existing population and continue its training, during every iteration of the training the best individual (model) and the current population it is saved to disk under the path **<installation_folder>/SnakeAI_data/**
 
 ### Neural Network
 The next parameters of a dense neural network are configurable:
@@ -73,14 +73,14 @@ The app implements a classic genetic algorithm, the following parameters are con
 
 - **Population :** Number of individuals
 - **Selection :** Selection method during evolution process
-- **Crossover:** Crossover method (specific parameters of the method are also configurable i.e crossover_rate)
+- **Crossover:** Crossover method (specific parameters of the method are also configurable, i.e crossover_rate)
 - **Mutation:** Mutation method (currently just Gaussian implemented)
 - **Replacement:** Population replacement method
 
 <br>
 
 ## Train Model
-During the training we can monitor the advance of the process with data represented over plots as population average score, population average fitness among others. It is also possible to stop the training and check how the model is performing launching the game.
+During the training we can monitor the progress of the process with data represented over plots, such as population average score and population average fitness among others. It is also possible to stop the training and check how the model is performing launching the game.
 
 <br>
 
@@ -102,7 +102,7 @@ The app can be build with all its resources using the current **"setup.cfg"**, o
 
 It can also be installed downloading the folder **SnakeAI_installer** and executing the file **"windows_installer.bat"** (Python >= 3.11.* and internet conexion is required to automatically install dependencies using pip).
 
-When the installation is completed, the installation folder will be allocated at the same folder where the file **"windows_installer.bat"** was. At this path we will doble-click to the file **"./SnakeAI/SnakeAI.vbs"** to start the app.
+When the installation is completed, the installation folder will be allocated at the same folder where the file **"windows_installer.bat"** was. In this path we will doble-click to the file **"./SnakeAI/SnakeAI.vbs"** to start the app.
 
 <br>
 
