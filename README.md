@@ -89,7 +89,13 @@ https://github.com/alvarott/SnakeAI/assets/129681739/a0543962-2e1a-4fdf-985d-a07
 <br>
 
 ## Statistics
+In this section the stats produced during the models execution at the section **Test Model** can be selected and compared among other models.
 
+<br>
+
+https://github.com/alvarott/SnakeAI/assets/129681739/1be16372-c352-4781-acea-f95afe63bd05
+
+<br>
 
 ## Dependencies
 This project make use of the following third-party libraries:
