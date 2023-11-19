@@ -36,7 +36,7 @@ https://github.com/laguneroo/SnakeAI/assets/129681739/6405decc-d97f-45d0-9b55-1c
 <br>
 
 ## Train Model Configuration
-Previous to lauch a model traning we will be prompted with a configuration window consisting in three tabs:
+Prior to launching a model traning we will be prompted with a configuration window consisting in three tabs:
 
 - General
 - Neural Network
