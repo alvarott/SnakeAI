@@ -29,13 +29,13 @@ https://github.com/laguneroo/SnakeAI/assets/129681739/1d25c24f-3924-43c3-a830-b9
 <br>
 
 ## Test Model
-In this section we can test our trained models and see the strongest activations over the neural network. During this execution the app produces son statistical data about the model that can be used to be compared with other models.
+In this section we can test our trained models and see the strongest activations over the neural network. During this execution the app produces statistical data about the model that can be used to be compared with other models.
 
 https://github.com/laguneroo/SnakeAI/assets/129681739/6405decc-d97f-45d0-9b55-1c6d864660ec
 
 <br>
 
-## Train Model Config
+## Train Model Configuration
 Previous to lauch a model traning we will be prompted with a configuration window consisting in three tabs:
 
 - General
